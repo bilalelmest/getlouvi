@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import StarRating from "@/components/StarRating";
 import Avatar from "@/components/Avatar";
 import AnimatedSection from "@/components/AnimatedSection";
@@ -93,7 +94,7 @@ const plans = [
   {
     name: "Business",
     monthlyPrice: 99,
-    features: ["Témoignages illimités", "Formulaires illimités", "Tous les widgets", "Domaine personnalisé", "API access", "Support dédié", "Analytics avancés"],
+    features: ["Témoignages illimités", "Formulaires illimités", "Tous les widgets", "Domaine personnalisé (bientôt)", "API access (bientôt)", "Support dédié", "Analytics avancés (bientôt)"],
     cta: "Contacter l'équipe",
     popular: false,
   },
@@ -102,6 +103,8 @@ const plans = [
 export default function LandingPage() {
   const [annual, setAnnual] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [heroEmail, setHeroEmail] = useState("");
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-stone-50">
@@ -174,19 +177,27 @@ export default function LandingPage() {
             </p>
           </AnimatedSection>
           <AnimatedSection delay={300}>
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                router.push(heroEmail ? `/signup?email=${encodeURIComponent(heroEmail)}` : "/signup");
+              }}
+              className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
+            >
               <input
                 type="email"
+                value={heroEmail}
+                onChange={(e) => setHeroEmail(e.target.value)}
                 placeholder="votre@email.com"
                 className="w-full sm:w-80 px-5 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
               />
-              <Link
-                href="/signup"
+              <button
+                type="submit"
                 className="w-full sm:w-auto gradient-primary text-white px-8 py-3 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow duration-200 text-center"
               >
                 Essai gratuit 7 jours
-              </Link>
-            </div>
+              </button>
+            </form>
             <p className="mt-4 text-xs text-stone-400">
               7 jours d&apos;essai gratuit · Aucune carte bancaire requise
             </p>

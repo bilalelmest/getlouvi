@@ -24,7 +24,7 @@ const plans = [
     id: "business",
     name: "Business",
     monthlyPrice: 99,
-    features: ["Témoignages illimités", "Formulaires illimités", "Tous les widgets", "Domaine personnalisé", "API access", "Support dédié", "Analytics avancés"],
+    features: ["Témoignages illimités", "Formulaires illimités", "Tous les widgets", "Domaine personnalisé (bientôt)", "API access (bientôt)", "Support dédié", "Analytics avancés (bientôt)"],
     popular: false,
   },
 ];
