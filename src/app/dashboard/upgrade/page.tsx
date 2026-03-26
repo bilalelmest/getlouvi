@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Profile, PLAN_LIMITS } from "@/lib/types";
 
@@ -31,7 +32,13 @@ const plans = [
 export default function UpgradePage() {
   const [annual, setAnnual] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  const success = searchParams.get("success") === "true";
+  const canceled = searchParams.get("canceled") === "true";
 
   useEffect(() => {
     const getProfile = async () => {
@@ -44,14 +51,91 @@ export default function UpgradePage() {
     getProfile();
   }, [supabase]);
 
+  // Re-fetch profile after successful payment to get updated plan
+  useEffect(() => {
+    if (success) {
+      const interval = setInterval(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+          if (data && data.plan !== "trial") {
+            setProfile(data);
+            clearInterval(interval);
+          }
+        }
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [success, supabase]);
+
   const trialDaysLeft = profile?.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
   const isExpired = profile?.plan === "trial" && trialDaysLeft <= 0;
+  const isPaid = profile?.plan && profile.plan !== "trial";
   const currentPlanLabel = profile ? (PLAN_LIMITS[profile.plan]?.label || profile.plan) : "";
+
+  const handleCheckout = async (planId: string) => {
+    setLoadingPlan(planId);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId, annual }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Une erreur est survenue");
+      }
+    } catch {
+      alert("Erreur de connexion au serveur");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const handlePortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Une erreur est survenue");
+      }
+    } catch {
+      alert("Erreur de connexion au serveur");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto">
+      {/* Success / Canceled banners */}
+      {success && (
+        <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-5 py-4 rounded-xl flex items-center gap-3">
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p className="font-medium">Paiement réussi !</p>
+            <p className="text-sm text-green-700">Merci ! Votre abonnement est maintenant actif.</p>
+          </div>
+        </div>
+      )}
+      {canceled && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-800 px-5 py-4 rounded-xl flex items-center gap-3">
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <p className="font-medium">Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.</p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="text-center mb-10">
         {isExpired ? (
@@ -83,8 +167,29 @@ export default function UpgradePage() {
         <p className="mt-3 text-stone-600 max-w-lg mx-auto">
           {isExpired
             ? "Votre essai est terminé. Choisissez le plan adapté à vos besoins pour continuer à utiliser Louvi."
-            : "Des plans flexibles pour toutes les tailles d'entreprise."}
+            : "Des plans flexibles pour toutes les tailles d'entreprise. Paiement sécurisé par Stripe."}
         </p>
+
+        {/* Manage subscription button for paid users */}
+        {isPaid && (
+          <button
+            onClick={handlePortal}
+            disabled={portalLoading}
+            className="mt-4 inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
+          >
+            {portalLoading ? (
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+              </svg>
+            )}
+            Gérer mon abonnement
+          </button>
+        )}
       </div>
 
       {/* Toggle */}
@@ -106,6 +211,7 @@ export default function UpgradePage() {
         {plans.map((plan) => {
           const price = annual ? Math.round(plan.monthlyPrice * 0.8) : plan.monthlyPrice;
           const isCurrent = profile?.plan === plan.id;
+          const isLoading = loadingPlan === plan.id;
 
           return (
             <div
@@ -146,16 +252,27 @@ export default function UpgradePage() {
                   Plan actuel
                 </div>
               ) : (
-                <a
-                  href={`mailto:contact@getlouvi.com?subject=Abonnement ${plan.name}&body=Bonjour,%0A%0AJe souhaite souscrire au plan ${plan.name} à ${price}€/mois${annual ? " (facturation annuelle)" : ""}.%0A%0AMerci !`}
-                  className={`block text-center py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                <button
+                  onClick={() => handleCheckout(plan.id)}
+                  disabled={isLoading || loadingPlan !== null}
+                  className={`block w-full text-center py-3 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                     plan.popular
                       ? "gradient-primary text-white shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
                       : "border border-stone-300 text-stone-700 hover:border-primary-500 hover:text-primary-500"
                   }`}
                 >
-                  Choisir {plan.name}
-                </a>
+                  {isLoading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Redirection...
+                    </span>
+                  ) : (
+                    `Choisir ${plan.name}`
+                  )}
+                </button>
               )}
             </div>
           );
@@ -167,10 +284,10 @@ export default function UpgradePage() {
         <h2 className="text-xl font-bold text-stone-950 text-center mb-8 font-serif">Questions fréquentes</h2>
         <div className="space-y-4">
           {[
-            { q: "Puis-je changer de plan à tout moment ?", a: "Oui, vous pouvez passer à un plan supérieur ou inférieur à tout moment. Le changement prend effet immédiatement." },
+            { q: "Puis-je changer de plan à tout moment ?", a: "Oui, vous pouvez passer à un plan supérieur ou inférieur à tout moment depuis votre espace de gestion Stripe." },
             { q: "Que se passe-t-il après l'essai gratuit ?", a: "Après 7 jours, vous devrez choisir un plan pour continuer à utiliser Louvi. Vos données sont conservées." },
             { q: "Y a-t-il un engagement ?", a: "Non, aucun engagement. Vous pouvez annuler à tout moment, que ce soit en mensuel ou en annuel." },
-            { q: "Comment fonctionne le paiement ?", a: "Contactez-nous pour mettre en place votre abonnement. Le paiement est sécurisé par Stripe." },
+            { q: "Comment fonctionne le paiement ?", a: "Le paiement est sécurisé par Stripe. Vous pouvez payer par carte bancaire (Visa, Mastercard, etc.). Vos informations bancaires ne transitent jamais par nos serveurs." },
           ].map((item) => (
             <div key={item.q} className="bg-white rounded-xl border border-stone-200 p-5">
               <h3 className="font-medium text-stone-950 text-sm">{item.q}</h3>
