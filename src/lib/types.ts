@@ -8,7 +8,7 @@ export interface Profile {
   created_at: string;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
-  form_mode: "b2b" | "b2c";
+  form_mode: "b2b" | "b2c" | null;
 }
 
 export interface Testimonial {

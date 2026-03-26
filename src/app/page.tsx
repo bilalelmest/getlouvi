@@ -420,12 +420,12 @@ export default function LandingPage() {
             © {new Date().getFullYear()} Louvi. Tous droits réservés.
           </p>
           <div className="flex gap-6 text-sm text-stone-500">
-            <a href="#" className="hover:text-stone-700 transition-colors duration-200">
+            <Link href="/mentions-legales" className="hover:text-stone-700 transition-colors duration-200">
               Mentions légales
-            </a>
-            <a href="#" className="hover:text-stone-700 transition-colors duration-200">
+            </Link>
+            <Link href="/confidentialite" className="hover:text-stone-700 transition-colors duration-200">
               Confidentialité
-            </a>
+            </Link>
           </div>
         </div>
       </footer>

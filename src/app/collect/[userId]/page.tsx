@@ -26,7 +26,7 @@ export default function CollectPage() {
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
-  const [formMode, setFormMode] = useState<"b2b" | "b2c">("b2b");
+  const [formMode, setFormMode] = useState<"b2b" | "b2c">("b2c");
   const [companyName, setCompanyName] = useState("");
   const [testimonialCount, setTestimonialCount] = useState(0);
   const [pageLoading, setPageLoading] = useState(true);
