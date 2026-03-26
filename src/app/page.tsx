@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Avatar from "@/components/Avatar";
+import StarRating from "@/components/StarRating";
 import AnimatedSection from "@/components/AnimatedSection";
 
 const features = [
@@ -93,6 +95,16 @@ const steps = [
       </svg>
     ),
   },
+];
+
+// Exemple de Wall of Love — comme si c'était les avis d'une vraie entreprise
+const demoTestimonials = [
+  { name: "Claire M.", role: "Cliente fidèle", rating: 5, content: "Les croissants sont incroyables, on dirait ceux de mon enfance. Je viens chaque dimanche matin avec ma famille. Le personnel est toujours souriant !" },
+  { name: "Julien R.", role: "", rating: 5, content: "J'ai commandé un gâteau d'anniversaire personnalisé et il était magnifique. Le goût était à la hauteur de la présentation. Merci !" },
+  { name: "Nadia B.", role: "Foodie", rating: 4, content: "Très bonne boulangerie de quartier. Le pain au levain est excellent. Seul bémol : il faut arriver tôt le samedi sinon il n'y en a plus." },
+  { name: "Marc D.", role: "", rating: 5, content: "Meilleure pâtisserie de Lyon. Les éclairs au chocolat sont une tuerie. Je recommande les yeux fermés." },
+  { name: "Sophie L.", role: "Organisatrice d'événements", rating: 5, content: "On fait appel à eux pour tous nos événements professionnels. La qualité est constante et le service impeccable." },
+  { name: "Antoine P.", role: "", rating: 4, content: "Bon rapport qualité-prix. J'apprécie particulièrement leurs viennoiseries le matin. Livraison rapide aussi." },
 ];
 
 const plans = [
@@ -302,6 +314,49 @@ export default function LandingPage() {
                 </div>
               </AnimatedSection>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Wall of Love — Exemple */}
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <AnimatedSection>
+            <div className="text-center mb-4">
+              <span className="inline-block bg-primary-50 text-primary-600 px-3 py-1 rounded-full text-xs font-medium mb-4">
+                Exemple de rendu
+              </span>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-stone-950 mb-4">
+                Voici à quoi ressemble un Wall of Love
+              </h2>
+              <p className="text-stone-600 max-w-2xl mx-auto">
+                Cet exemple montre comment une boulangerie pourrait afficher les avis de ses clients grâce à Louvi.
+              </p>
+            </div>
+          </AnimatedSection>
+          <div className="mt-12 bg-stone-900 rounded-2xl p-8 md:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {demoTestimonials.map((t, i) => (
+                <AnimatedSection key={t.name} delay={i * 80}>
+                  <div className="bg-stone-800 rounded-xl border border-stone-700 p-5">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar name={t.name} size="sm" />
+                      <div>
+                        <p className="font-semibold text-white text-sm">{t.name}</p>
+                        {t.role && <p className="text-xs text-stone-400">{t.role}</p>}
+                      </div>
+                    </div>
+                    <StarRating rating={t.rating} size="sm" />
+                    <p className="mt-2 text-sm text-stone-300 leading-relaxed">
+                      {t.content}
+                    </p>
+                  </div>
+                </AnimatedSection>
+              ))}
+            </div>
+            <p className="text-center text-xs text-stone-500 mt-6">
+              Widget carrousel sombre — un des 4 styles disponibles
+            </p>
           </div>
         </div>
       </section>
