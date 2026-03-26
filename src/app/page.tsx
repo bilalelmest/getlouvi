@@ -244,17 +244,21 @@ export default function LandingPage() {
               <p className="text-center text-sm text-stone-500 mb-5 font-medium">
                 S&apos;installe en 2 minutes sur vos plateformes préférées
               </p>
-              <p className="text-center text-xs text-stone-400 mb-4">
-                Compatible avec tous les sites — il suffit de coller un code embed
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 text-stone-400">
-                <span className="text-sm font-semibold tracking-wide">Shopify</span>
-                <span className="text-sm font-semibold tracking-wide">WordPress</span>
-                <span className="text-sm font-semibold tracking-wide">Wix</span>
-                <span className="text-sm font-semibold tracking-wide">Webflow</span>
-                <span className="text-sm font-semibold tracking-wide">Framer</span>
-                <span className="text-sm font-semibold tracking-wide">Squarespace</span>
-                <span className="text-sm font-semibold tracking-wide">HTML</span>
+              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+                {[
+                  { name: "Shopify", logo: "/logos/shopify.svg" },
+                  { name: "WordPress", logo: "/logos/wordpress.svg" },
+                  { name: "Wix", logo: "/logos/wix.svg" },
+                  { name: "Webflow", logo: "/logos/webflow.svg" },
+                  { name: "Framer", logo: "/logos/framer.svg" },
+                  { name: "Squarespace", logo: "/logos/squarespace.svg" },
+                  { name: "HTML", logo: "/logos/html5.svg" },
+                ].map((platform) => (
+                  <div key={platform.name} className="flex items-center gap-2 text-stone-500">
+                    <img src={platform.logo} alt={platform.name} className="w-6 h-6 opacity-60" />
+                    <span className="text-sm font-medium">{platform.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </AnimatedSection>
