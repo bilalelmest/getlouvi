@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Profile } from "@/lib/types";
+import { Profile, PLAN_LIMITS } from "@/lib/types";
 
 const navItems = [
   {
@@ -43,6 +43,7 @@ export default function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -58,15 +59,41 @@ export default function DashboardLayout({
           .single();
         if (data) setProfile(data);
       }
+      setLoading(false);
     };
     getProfile();
   }, [supabase]);
+
+  // Check trial expiry — redirect to upgrade page
+  useEffect(() => {
+    if (!profile || loading) return;
+    if (profile.plan === "trial" && new Date(profile.trial_ends_at) < new Date()) {
+      if (pathname !== "/dashboard/upgrade") {
+        router.push("/dashboard/upgrade");
+      }
+    }
+  }, [profile, loading, pathname, router]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   };
+
+  const trialDaysLeft = profile
+    ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  const isTrialActive = profile?.plan === "trial" && trialDaysLeft > 0;
+  const planLabel = profile ? PLAN_LIMITS[profile.plan]?.label || profile.plan : "";
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-stone-50 flex">
@@ -87,14 +114,28 @@ export default function DashboardLayout({
             className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors duration-200 text-stone-500"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              {collapsed ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              )}
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
         </div>
+
+        {/* Trial banner */}
+        {!collapsed && isTrialActive && (
+          <div className="mx-3 mt-3 p-3 rounded-lg bg-primary-50 border border-primary-100">
+            <p className="text-xs font-medium text-primary-700">
+              Essai gratuit
+            </p>
+            <p className="text-xs text-primary-600 mt-0.5">
+              {trialDaysLeft} jour{trialDaysLeft > 1 ? "s" : ""} restant{trialDaysLeft > 1 ? "s" : ""}
+            </p>
+            <Link
+              href="/dashboard/upgrade"
+              className="mt-2 block text-center text-xs gradient-primary text-white py-1.5 rounded-md font-medium"
+            >
+              Passer à un plan
+            </Link>
+          </div>
+        )}
 
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => {
@@ -119,7 +160,7 @@ export default function DashboardLayout({
             );
           })}
 
-          {/* Formulaire link — opens in new tab */}
+          {/* Formulaire link */}
           {profile && (
             <a
               href={`/collect/${profile.collect_link_id}`}
@@ -139,6 +180,22 @@ export default function DashboardLayout({
         </nav>
 
         <div className="p-3 border-t border-stone-200">
+          {/* Plan badge */}
+          {!collapsed && profile && (
+            <div className="px-3 mb-3 flex items-center gap-2">
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                profile.plan === "trial"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : profile.plan === "pro"
+                  ? "bg-primary-100 text-primary-700"
+                  : profile.plan === "business"
+                  ? "bg-stone-800 text-white"
+                  : "bg-stone-100 text-stone-600"
+              }`}>
+                {planLabel}
+              </span>
+            </div>
+          )}
           <button
             onClick={handleLogout}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition-colors duration-200 w-full ${

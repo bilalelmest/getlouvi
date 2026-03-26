@@ -2,7 +2,8 @@ export interface Profile {
   id: string;
   company_name: string;
   website: string | null;
-  plan: string;
+  plan: "trial" | "starter" | "pro" | "business";
+  trial_ends_at: string;
   collect_link_id: string;
   created_at: string;
 }
@@ -19,3 +20,10 @@ export interface Testimonial {
   tag: string | null;
   created_at: string;
 }
+
+export const PLAN_LIMITS: Record<string, { testimonials: number; label: string }> = {
+  trial: { testimonials: 10, label: "Essai gratuit" },
+  starter: { testimonials: 50, label: "Starter" },
+  pro: { testimonials: 500, label: "Pro" },
+  business: { testimonials: 999999, label: "Business" },
+};

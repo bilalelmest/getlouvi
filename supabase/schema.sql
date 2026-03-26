@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   company_name TEXT NOT NULL DEFAULT '',
   website TEXT,
-  plan TEXT NOT NULL DEFAULT 'free',
+  plan TEXT NOT NULL DEFAULT 'trial',
+  trial_ends_at TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
   collect_link_id TEXT UNIQUE NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -66,10 +67,12 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, company_name, collect_link_id)
+  INSERT INTO public.profiles (id, company_name, plan, trial_ends_at, collect_link_id)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'company_name', ''),
+    'trial',
+    NOW() + INTERVAL '7 days',
     public.generate_collect_link_id()
   );
   RETURN NEW;
@@ -92,56 +95,37 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
 -- Supprimer les anciennes policies si elles existent
-DROP POLICY IF EXISTS "Les utilisateurs peuvent voir leur propre profil" ON public.profiles;
-DROP POLICY IF EXISTS "Les utilisateurs peuvent créer leur profil" ON public.profiles;
-DROP POLICY IF EXISTS "Les utilisateurs peuvent modifier leur profil" ON public.profiles;
-DROP POLICY IF EXISTS "Lecture publique des profils par collect_link_id" ON public.profiles;
-DROP POLICY IF EXISTS "Les propriétaires peuvent voir leurs témoignages" ON public.testimonials;
-DROP POLICY IF EXISTS "Les propriétaires peuvent modifier leurs témoignages" ON public.testimonials;
-DROP POLICY IF EXISTS "Les propriétaires peuvent supprimer leurs témoignages" ON public.testimonials;
-DROP POLICY IF EXISTS "Lecture publique des témoignages approuvés" ON public.testimonials;
+DROP POLICY IF EXISTS "Lecture publique des profils" ON public.profiles;
+DROP POLICY IF EXISTS "Insertion de son propre profil" ON public.profiles;
+DROP POLICY IF EXISTS "Modification de son propre profil" ON public.profiles;
+DROP POLICY IF EXISTS "Propriétaire voit ses témoignages" ON public.testimonials;
+DROP POLICY IF EXISTS "Témoignages approuvés publics" ON public.testimonials;
 DROP POLICY IF EXISTS "Création publique de témoignages" ON public.testimonials;
+DROP POLICY IF EXISTS "Propriétaire modifie ses témoignages" ON public.testimonials;
+DROP POLICY IF EXISTS "Propriétaire supprime ses témoignages" ON public.testimonials;
 
 -- PROFILES ---
-
--- Tout le monde peut lire les profils (nécessaire pour /collect/[id] et /wall/[id])
 CREATE POLICY "Lecture publique des profils"
-  ON public.profiles FOR SELECT
-  USING (true);
+  ON public.profiles FOR SELECT USING (true);
 
--- Un utilisateur peut insérer son propre profil
 CREATE POLICY "Insertion de son propre profil"
-  ON public.profiles FOR INSERT
-  WITH CHECK (auth.uid() = id);
+  ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Un utilisateur peut modifier son propre profil
 CREATE POLICY "Modification de son propre profil"
-  ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
+  ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- TESTIMONIALS ---
-
--- Un propriétaire peut voir tous ses témoignages (quel que soit le statut)
 CREATE POLICY "Propriétaire voit ses témoignages"
-  ON public.testimonials FOR SELECT
-  USING (auth.uid() = owner_id);
+  ON public.testimonials FOR SELECT USING (auth.uid() = owner_id);
 
--- Les témoignages approuvés sont lisibles par tous (wall public)
 CREATE POLICY "Témoignages approuvés publics"
-  ON public.testimonials FOR SELECT
-  USING (status = 'approved');
+  ON public.testimonials FOR SELECT USING (status = 'approved');
 
--- N'importe qui peut créer un témoignage (formulaire public /collect)
 CREATE POLICY "Création publique de témoignages"
-  ON public.testimonials FOR INSERT
-  WITH CHECK (true);
+  ON public.testimonials FOR INSERT WITH CHECK (true);
 
--- Un propriétaire peut modifier ses témoignages (approuver/refuser)
 CREATE POLICY "Propriétaire modifie ses témoignages"
-  ON public.testimonials FOR UPDATE
-  USING (auth.uid() = owner_id);
+  ON public.testimonials FOR UPDATE USING (auth.uid() = owner_id);
 
--- Un propriétaire peut supprimer ses témoignages
 CREATE POLICY "Propriétaire supprime ses témoignages"
-  ON public.testimonials FOR DELETE
-  USING (auth.uid() = owner_id);
+  ON public.testimonials FOR DELETE USING (auth.uid() = owner_id);
