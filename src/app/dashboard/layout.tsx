@@ -60,6 +60,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingName, setOnboardingName] = useState("");
+  const [onboardingSaving, setOnboardingSaving] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -69,12 +72,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-        if (data) setProfile(data);
+        if (data) {
+          setProfile(data);
+          // Show onboarding if company_name is empty (Google OAuth users)
+          if (!data.company_name || data.company_name.trim() === "" || data.company_name === "EMPTY") {
+            setShowOnboarding(true);
+          }
+        }
       }
       setLoading(false);
     };
     getProfile();
   }, [supabase]);
+
+  const handleOnboardingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onboardingName.trim() || !profile) return;
+    setOnboardingSaving(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ company_name: onboardingName.trim() })
+      .eq("id", profile.id);
+    if (!error) {
+      setProfile({ ...profile, company_name: onboardingName.trim() });
+      setShowOnboarding(false);
+    }
+    setOnboardingSaving(false);
+  };
 
   const trialDaysLeft = profile?.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
@@ -107,6 +131,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ProfileContext.Provider value={{ profile, trialDaysLeft, isExpired }}>
+      {/* Onboarding modal for Google OAuth users with no company name */}
+      {showOnboarding && (
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center px-6">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-50 text-primary-500 mb-4">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-stone-950">Bienvenue sur Louvi !</h2>
+              <p className="text-sm text-stone-600 mt-2">
+                Pour commencer, indiquez le nom de votre entreprise. Il sera affiché sur votre formulaire de collecte.
+              </p>
+            </div>
+            <form onSubmit={handleOnboardingSubmit}>
+              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                Nom de l&apos;entreprise
+              </label>
+              <input
+                type="text"
+                value={onboardingName}
+                onChange={(e) => setOnboardingName(e.target.value)}
+                required
+                autoFocus
+                placeholder="Mon Entreprise"
+                className="w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+              />
+              <button
+                type="submit"
+                disabled={onboardingSaving || !onboardingName.trim()}
+                className="mt-4 w-full gradient-primary text-white py-3 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow duration-200 disabled:opacity-50"
+              >
+                {onboardingSaving ? "Enregistrement..." : "Continuer"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
       <div className="min-h-screen bg-stone-50 flex">
         {/* Sidebar */}
         <aside className={`${collapsed ? "w-16" : "w-64"} bg-white border-r border-stone-200 flex flex-col transition-all duration-200 shrink-0 sticky top-0 h-screen`}>
