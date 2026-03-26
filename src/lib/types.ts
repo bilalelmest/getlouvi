@@ -23,9 +23,16 @@ export interface Testimonial {
   created_at: string;
 }
 
-export const PLAN_LIMITS: Record<string, { testimonials: number; label: string }> = {
-  trial: { testimonials: 10, label: "Essai gratuit" },
-  starter: { testimonials: 50, label: "Starter" },
-  pro: { testimonials: 500, label: "Pro" },
-  business: { testimonials: 999999, label: "Business" },
+export type WidgetStyle = "grid" | "carousel" | "list" | "badge";
+
+export const PLAN_LIMITS: Record<string, {
+  testimonials: number;
+  label: string;
+  widgets: WidgetStyle[];
+  darkTheme: boolean;
+}> = {
+  trial: { testimonials: 10, label: "Essai gratuit", widgets: ["grid", "list"], darkTheme: false },
+  starter: { testimonials: 50, label: "Starter", widgets: ["grid", "list"], darkTheme: false },
+  pro: { testimonials: 500, label: "Pro", widgets: ["grid", "carousel", "list", "badge"], darkTheme: true },
+  business: { testimonials: 999999, label: "Business", widgets: ["grid", "carousel", "list", "badge"], darkTheme: true },
 };

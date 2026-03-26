@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Testimonial, Profile } from "@/lib/types";
+import { Testimonial, Profile, PLAN_LIMITS, WidgetStyle } from "@/lib/types";
 import Avatar from "@/components/Avatar";
 import StarRating from "@/components/StarRating";
 
-type WidgetStyle = "grid" | "carousel" | "list" | "badge";
 type ThemeMode = "light" | "dark";
 
 export default function WidgetsPage() {
@@ -72,6 +71,10 @@ export default function WidgetsPage() {
   const border = isDark ? "border-stone-700" : "border-stone-200";
   const cardBg = isDark ? "bg-stone-800" : "bg-stone-50";
 
+  const planConfig = profile ? PLAN_LIMITS[profile.plan] : PLAN_LIMITS.trial;
+  const allowedWidgets = planConfig?.widgets || ["grid", "list"];
+  const allowDarkTheme = planConfig?.darkTheme || false;
+
   const styles: { value: WidgetStyle; label: string; desc: string }[] = [
     { value: "grid", label: "Grille", desc: "2 colonnes" },
     { value: "carousel", label: "Carrousel", desc: "Défilant" },
@@ -129,19 +132,31 @@ export default function WidgetsPage() {
           <div>
             <p className="text-sm font-medium text-stone-700 mb-2">Style</p>
             <div className="flex gap-2">
-              {styles.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => setStyle(s.value)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    style === s.value
-                      ? "bg-primary-500 text-white shadow-md"
-                      : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+              {styles.map((s) => {
+                const locked = !allowedWidgets.includes(s.value);
+                return (
+                  <button
+                    key={s.value}
+                    onClick={() => !locked && setStyle(s.value)}
+                    disabled={locked}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
+                      locked
+                        ? "bg-stone-100 text-stone-400 cursor-not-allowed"
+                        : style === s.value
+                        ? "bg-primary-500 text-white shadow-md"
+                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                    }`}
+                    title={locked ? "Disponible avec le plan Pro" : ""}
+                  >
+                    {locked && (
+                      <svg className="w-3 h-3 absolute -top-1 -right-1 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {s.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div>
@@ -161,13 +176,22 @@ export default function WidgetsPage() {
                 Clair
               </button>
               <button
-                onClick={() => setTheme("dark")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                  theme === "dark"
+                onClick={() => allowDarkTheme && setTheme("dark")}
+                disabled={!allowDarkTheme}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 relative ${
+                  !allowDarkTheme
+                    ? "bg-stone-100 text-stone-400 cursor-not-allowed"
+                    : theme === "dark"
                     ? "bg-primary-500 text-white shadow-md"
                     : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                 }`}
+                title={!allowDarkTheme ? "Disponible avec le plan Pro" : ""}
               >
+                {!allowDarkTheme && (
+                  <svg className="w-3 h-3 absolute -top-1 -right-1 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                )}
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
                 </svg>
