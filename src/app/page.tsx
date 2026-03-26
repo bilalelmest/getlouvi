@@ -125,7 +125,7 @@ export default function LandingPage() {
               href="/signup"
               className="gradient-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow duration-200"
             >
-              Démarrer gratuitement
+              Essai gratuit 7 jours
             </Link>
           </div>
           {/* Mobile menu button */}
@@ -145,7 +145,7 @@ export default function LandingPage() {
             <a href="#tarifs" className="block text-stone-600 text-sm" onClick={() => setMobileMenu(false)}>Tarifs</a>
             <Link href="/login" className="block text-stone-600 text-sm">Connexion</Link>
             <Link href="/signup" className="block gradient-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium text-center">
-              Démarrer gratuitement
+              Essai gratuit 7 jours
             </Link>
           </div>
         )}
@@ -184,11 +184,11 @@ export default function LandingPage() {
                 href="/signup"
                 className="w-full sm:w-auto gradient-primary text-white px-8 py-3 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow duration-200 text-center"
               >
-                Démarrer gratuitement
+                Essai gratuit 7 jours
               </Link>
             </div>
             <p className="mt-4 text-xs text-stone-400">
-              Gratuit pour commencer · Aucune carte bancaire requise
+              7 jours d&apos;essai gratuit · Aucune carte bancaire requise
             </p>
           </AnimatedSection>
         </div>
@@ -399,7 +399,7 @@ export default function LandingPage() {
               href="/signup"
               className="inline-block bg-white text-primary-600 px-8 py-3 rounded-lg text-sm font-semibold hover:bg-primary-50 transition-colors duration-200 shadow-lg"
             >
-              Démarrer gratuitement
+              Essai gratuit 7 jours
             </Link>
           </div>
         </AnimatedSection>
