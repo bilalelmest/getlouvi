@@ -189,6 +189,34 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Form Mode Toggle */}
+      {profile && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5 mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-stone-700">Mode du formulaire</p>
+              <p className="text-xs text-stone-500 mt-0.5">
+                {profile.form_mode === "b2c" ? "B2C : seul le nom est demandé" : "B2B : nom, rôle et entreprise"}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-medium ${profile.form_mode === "b2c" ? "text-primary-600" : "text-stone-400"}`}>B2C</span>
+              <button
+                onClick={async () => {
+                  const newMode = profile.form_mode === "b2b" ? "b2c" : "b2b";
+                  await supabase.from("profiles").update({ form_mode: newMode }).eq("id", profile.id);
+                  setProfile({ ...profile, form_mode: newMode });
+                }}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${profile.form_mode === "b2b" ? "bg-primary-500" : "bg-stone-300"}`}
+              >
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${profile.form_mode === "b2b" ? "translate-x-5" : "translate-x-0.5"}`} />
+              </button>
+              <span className={`text-xs font-medium ${profile.form_mode === "b2b" ? "text-primary-600" : "text-stone-400"}`}>B2B</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Empty state */}
       {testimonials.length === 0 ? (
         <div className="bg-white rounded-xl border border-stone-200 p-12 text-center">

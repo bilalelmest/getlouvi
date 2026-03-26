@@ -14,6 +14,7 @@ export default function WidgetsPage() {
   const [style, setStyle] = useState<WidgetStyle>("grid");
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [copied, setCopied] = useState(false);
+  const [embedType, setEmbedType] = useState<"iframe" | "script">("iframe");
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -45,6 +46,9 @@ export default function WidgetsPage() {
     if (!profile) return "";
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const height = style === "badge" ? "250" : "500";
+    if (embedType === "script") {
+      return `<div id="louvi-widget"></div>\n<script src="${origin}/embed.js" data-id="${profile.collect_link_id}" data-widget="${style}" data-theme="${theme}"></script>`;
+    }
     return `<iframe src="${origin}/wall/${profile.collect_link_id}?widget=${style}&theme=${theme}" width="100%" height="${height}" frameborder="0" style="border:none;border-radius:14px;overflow:hidden;"></iframe>`;
   };
 
@@ -93,27 +97,27 @@ export default function WidgetsPage() {
   const demoTestimonials: Testimonial[] = testimonials.length > 0 ? testimonials : [
     {
       id: "demo-1", owner_id: "", author_name: "Marie Dupont", author_role: "CEO",
-      author_company: "TechStart", rating: 5,
+      author_company: "TechStart", author_photo_url: null, rating: 5,
       content: "Un outil incroyable qui a transformé notre approche client. Je recommande vivement !",
-      status: "approved", tag: null, created_at: new Date().toISOString(),
+      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
     },
     {
       id: "demo-2", owner_id: "", author_name: "Thomas Bernard", author_role: "CTO",
-      author_company: "DataFlow", rating: 4,
+      author_company: "DataFlow", author_photo_url: null, rating: 4,
       content: "Simple, efficace et élégant. Le widget s'intègre parfaitement à notre site.",
-      status: "approved", tag: null, created_at: new Date().toISOString(),
+      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
     },
     {
-      id: "demo-3", owner_id: "", author_name: "Sophie Martin", author_role: "Designer",
-      author_company: "CreativeStudio", rating: 5,
+      id: "demo-3", owner_id: "", author_name: "Sophie Martin", author_role: "Directrice Design",
+      author_company: "CreativeStudio", author_photo_url: null, rating: 5,
       content: "Le design est magnifique. Mes clients sont impressionnés par la présentation.",
-      status: "approved", tag: null, created_at: new Date().toISOString(),
+      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
     },
     {
       id: "demo-4", owner_id: "", author_name: "Lucas Moreau", author_role: "Fondateur",
-      author_company: "StartupLab", rating: 5,
+      author_company: "StartupLab", author_photo_url: null, rating: 5,
       content: "Exactement ce qu'il nous fallait pour mettre en avant nos avis clients.",
-      status: "approved", tag: null, created_at: new Date().toISOString(),
+      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
     },
   ];
 
@@ -319,9 +323,30 @@ export default function WidgetsPage() {
             {copied ? "✓ Copié !" : "Copier le code"}
           </button>
         </div>
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={() => setEmbedType("iframe")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              embedType === "iframe" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+            }`}
+          >
+            iFrame
+          </button>
+          <button
+            onClick={() => setEmbedType("script")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              embedType === "script" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+            }`}
+          >
+            Script JS (SEO)
+          </button>
+        </div>
         <pre className="bg-stone-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto">
           <code>{getEmbedCode()}</code>
         </pre>
+        {embedType === "script" && (
+          <p className="text-xs text-stone-500 mt-2">Le script injecte le widget directement dans le DOM — meilleur pour le SEO.</p>
+        )}
       </div>
     </div>
   );

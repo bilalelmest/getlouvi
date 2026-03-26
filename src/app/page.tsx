@@ -194,34 +194,40 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Trust Bar — Plateformes compatibles */}
       <section className="py-12 px-6">
         <div className="max-w-4xl mx-auto">
           <AnimatedSection>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 bg-white rounded-2xl border border-stone-200 p-8 shadow-sm">
-              <div className="text-center">
-                <p className="text-3xl md:text-4xl font-bold text-primary-500">
-                  <AnimatedCounter end={200} suffix="+" />
-                </p>
-                <p className="text-sm text-stone-600 mt-1">Entreprises</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl md:text-4xl font-bold text-primary-500">
-                  <AnimatedCounter end={50} suffix="K+" />
-                </p>
-                <p className="text-sm text-stone-600 mt-1">Témoignages</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl md:text-4xl font-bold text-primary-500">
-                  <AnimatedCounter end={4} suffix=".8/5" />
-                </p>
-                <p className="text-sm text-stone-600 mt-1">Note moyenne</p>
-              </div>
-              <div className="text-center">
-                <p className="text-3xl md:text-4xl font-bold text-primary-500">
-                  <AnimatedCounter end={35} suffix="%" prefix="+" />
-                </p>
-                <p className="text-sm text-stone-600 mt-1">Conversions</p>
+            <div className="bg-white rounded-2xl border border-stone-200 p-8 shadow-sm">
+              <p className="text-center text-sm text-stone-500 mb-6 font-medium">
+                S&apos;installe en 2 minutes sur vos plateformes préférées
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-70">
+                {/* Shopify */}
+                <div className="flex items-center gap-2 text-stone-600">
+                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor"><path d="M15.337 3.654c-.053-.21-.21-.316-.368-.316s-.42.053-.42.053l-.578.158-.368-1.052c-.053-.158-.21-.316-.42-.316h-.053L12.5 2.5c-.053-.21-.158-.42-.316-.578-.368-.368-.893-.526-1.42-.526h-.21c-.21-.263-.42-.473-.683-.526C9.45.763 9.03.816 8.66 1c-.736.368-1.104 1.157-1.262 1.578l-1.42.42c-.42.105-.473.158-.526.578L4.4 11.39l7.99 1.525.368-9.26zM11.5 4.39l-1.157.316c.105-.42.368-.893.684-1.21.158-.158.368-.316.63-.368.21.473.263.946.263 1.262h-.42zm-1.84-1.682c.21 0 .368.053.526.158-.263.158-.473.368-.63.63-.368.578-.578 1.367-.63 1.735l-1.052.316c.21-.84.736-2.576 1.578-2.839h.21zm-.368 8.84L8.4 7.917c.263.053.578.053.893 0 .158 0 .316-.053.42-.053l.053 3.684h-.473z"/></svg>
+                  <span className="text-sm font-medium">Shopify</span>
+                </div>
+                {/* WordPress */}
+                <div className="flex items-center gap-2 text-stone-600">
+                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm-1.5 17.77c-3.78-.77-6.62-4.15-6.62-8.15 0-.62.07-1.22.2-1.8l4.52 12.38-.1-.43zm8.74-2.65c-.23-.73-.68-1.58-.68-1.58l-2.37-6.87c-.44-1.1-.65-1.98-.65-2.69 0-.28.02-.54.06-.78A8.46 8.46 0 0120.12 12c0 1.94-.65 3.73-1.75 5.16l-.13-.04zM12 3.88c1.57 0 3.04.43 4.3 1.17-.07.04-.13.09-.19.16-.74.74-.64 2.04-.02 3.24l2.37 6.87s.43 1.24.59 1.9A8.1 8.1 0 0112 20.12c-.56 0-1.1-.06-1.63-.17l3.45-10.02-1.42-.04s-.46-.02-.46-.48.5-.5.5-.5h3.22c.24 0 .43-.06.43-.06A8.08 8.08 0 0012 3.88z"/></svg>
+                  <span className="text-sm font-medium">WordPress</span>
+                </div>
+                {/* Wix */}
+                <div className="flex items-center gap-2 text-stone-600">
+                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor"><path d="M5.344 6.517c-.328.17-.61.503-.784.923-.263.636-2.1 5.95-2.1 5.95s-1.69-5.003-1.9-5.694C.305 6.927.04 6.71-.001 6.51l.002.003c.138-.4.33-.656.6-.84C.85 5.505 1.2 5.5 1.2 5.5h1.24s.97-.006 1.36.5c.26.337.354.77 1.544 4.49L7.13 5.856c.12-.28.333-.443.59-.443.258 0 .47.163.59.443l1.787 4.634c1.19-3.72 1.283-4.153 1.543-4.49.39-.506 1.36-.5 1.36-.5h1.24s.35-.005.6.17c.27.184.462.44.6.84l.002-.003c-.04.2-.306.417-.56 1.186-.21.691-1.9 5.694-1.9 5.694s-1.837-5.314-2.1-5.95c-.174-.42-.456-.753-.784-.923-.247-.127-.632-.127-.632-.127s-.385 0-.632.127z"/></svg>
+                  <span className="text-sm font-medium">Wix</span>
+                </div>
+                {/* Webflow */}
+                <div className="flex items-center gap-2 text-stone-600">
+                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor"><path d="M17.802 8.56s-1.946 6.066-2.047 6.386c-.045-.364-1.155-6.386-1.155-6.386s-2.81 0-2.81 0c0 0-1.204 6.022-1.257 6.386-.099-.32-2.04-6.386-2.04-6.386H5.6L9.19 19.44h2.927l1.204-5.74 1.204 5.74h2.929L21.04 8.56h-3.238z"/></svg>
+                  <span className="text-sm font-medium">Webflow</span>
+                </div>
+                {/* Framer */}
+                <div className="flex items-center gap-2 text-stone-600">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M4 0h16v8H12l8 8H4V8h8L4 0zm0 16h8v8L4 16z"/></svg>
+                  <span className="text-sm font-medium">Framer</span>
+                </div>
               </div>
             </div>
           </AnimatedSection>
@@ -401,6 +407,7 @@ export default function LandingPage() {
             >
               Essai gratuit 7 jours
             </Link>
+            <p className="text-primary-200 text-xs mt-3">Aucune carte bancaire requise</p>
           </div>
         </AnimatedSection>
       </section>

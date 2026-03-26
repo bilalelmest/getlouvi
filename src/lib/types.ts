@@ -8,6 +8,7 @@ export interface Profile {
   created_at: string;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  form_mode: "b2b" | "b2c";
 }
 
 export interface Testimonial {
@@ -16,10 +17,12 @@ export interface Testimonial {
   author_name: string;
   author_role: string | null;
   author_company: string | null;
+  author_photo_url: string | null;
   rating: number;
   content: string;
   status: "pending" | "approved" | "rejected";
   tag: string | null;
+  gdpr_consent: boolean;
   created_at: string;
 }
 
