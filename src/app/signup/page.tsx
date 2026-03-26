@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 function SignupForm() {
@@ -12,7 +12,7 @@ function SignupForm() {
   const [companyName, setCompanyName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [emailSent, setEmailSent] = useState(false);
   const supabase = createClient();
 
   const translateError = (message: string): string => {
@@ -35,7 +35,7 @@ function SignupForm() {
         password,
         options: {
           data: { company_name: companyName },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
@@ -45,10 +45,8 @@ function SignupForm() {
         return;
       }
 
-      // Le trigger Supabase crée automatiquement le profil
-      // Redirection vers le dashboard
-      router.push("/dashboard");
-      router.refresh();
+      // Show email confirmation screen
+      setEmailSent(true);
     } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
       setLoading(false);
@@ -63,6 +61,47 @@ function SignupForm() {
       },
     });
   };
+
+  // Email sent confirmation screen
+  if (emailSent) {
+    return (
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center px-6">
+        <div className="w-full max-w-md text-center">
+          <Link href="/" className="text-3xl font-bold text-primary-500 font-serif">
+            Louvi
+          </Link>
+          <div className="mt-8 bg-white rounded-xl border border-stone-200 p-8 shadow-sm">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-50 mb-5">
+              <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-stone-950 mb-2">Vérifiez votre email</h2>
+            <p className="text-sm text-stone-600 mb-4">
+              Un email de confirmation a été envoyé à
+            </p>
+            <p className="text-sm font-semibold text-stone-950 bg-stone-50 rounded-lg py-2 px-4 inline-block mb-4">
+              {email}
+            </p>
+            <p className="text-sm text-stone-600 mb-6">
+              Cliquez sur le lien dans l&apos;email pour activer votre compte et accéder à votre tableau de bord.
+            </p>
+            <div className="border-t border-stone-200 pt-4">
+              <p className="text-xs text-stone-400">
+                Vous n&apos;avez pas reçu l&apos;email ? Vérifiez vos spams ou{" "}
+                <button
+                  onClick={() => { setEmailSent(false); setLoading(false); }}
+                  className="text-primary-500 hover:underline font-medium"
+                >
+                  réessayez
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-stone-50 flex items-center justify-center px-6">
