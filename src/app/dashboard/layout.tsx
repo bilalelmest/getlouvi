@@ -1,10 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Profile, PLAN_LIMITS } from "@/lib/types";
+
+// Context to share profile across dashboard pages
+const ProfileContext = createContext<{ profile: Profile | null; trialDaysLeft: number; isExpired: boolean }>({
+  profile: null,
+  trialDaysLeft: 0,
+  isExpired: false,
+});
+
+export function useProfile() {
+  return useContext(ProfileContext);
+}
 
 const navItems = [
   {
@@ -34,13 +45,18 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    label: "Tarifs",
+    href: "/dashboard/upgrade",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+      </svg>
+    ),
+  },
 ];
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,11 +68,7 @@ export default function DashboardLayout({
     const getProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
+        const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
         if (data) setProfile(data);
       }
       setLoading(false);
@@ -64,15 +76,18 @@ export default function DashboardLayout({
     getProfile();
   }, [supabase]);
 
-  // Check trial expiry — redirect to upgrade page
+  const trialDaysLeft = profile?.trial_ends_at
+    ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
+  const isExpired = profile?.plan === "trial" && trialDaysLeft <= 0;
+
+  // Redirect to upgrade if trial expired
   useEffect(() => {
     if (!profile || loading) return;
-    if (profile.plan === "trial" && new Date(profile.trial_ends_at) < new Date()) {
-      if (pathname !== "/dashboard/upgrade") {
-        router.push("/dashboard/upgrade");
-      }
+    if (isExpired && pathname !== "/dashboard/upgrade") {
+      router.push("/dashboard/upgrade");
     }
-  }, [profile, loading, pathname, router]);
+  }, [profile, loading, pathname, router, isExpired]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -80,12 +95,7 @@ export default function DashboardLayout({
     router.refresh();
   };
 
-  const trialDaysLeft = profile
-    ? Math.max(0, Math.ceil((new Date(profile.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0;
-
-  const isTrialActive = profile?.plan === "trial" && trialDaysLeft > 0;
-  const planLabel = profile ? PLAN_LIMITS[profile.plan]?.label || profile.plan : "";
+  const planLabel = profile ? (PLAN_LIMITS[profile.plan]?.label || profile.plan) : "";
 
   if (loading) {
     return (
@@ -96,127 +106,152 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 flex">
-      {/* Sidebar */}
-      <aside
-        className={`${
-          collapsed ? "w-16" : "w-64"
-        } bg-white border-r border-stone-200 flex flex-col transition-all duration-200 shrink-0 sticky top-0 h-screen`}
-      >
-        <div className="h-16 flex items-center justify-between px-4 border-b border-stone-200">
-          {!collapsed && (
-            <Link href="/dashboard" className="text-xl font-bold text-primary-500 font-serif">
-              Louvi
-            </Link>
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors duration-200 text-stone-500"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Trial banner */}
-        {!collapsed && isTrialActive && (
-          <div className="mx-3 mt-3 p-3 rounded-lg bg-primary-50 border border-primary-100">
-            <p className="text-xs font-medium text-primary-700">
-              Essai gratuit
-            </p>
-            <p className="text-xs text-primary-600 mt-0.5">
-              {trialDaysLeft} jour{trialDaysLeft > 1 ? "s" : ""} restant{trialDaysLeft > 1 ? "s" : ""}
-            </p>
-            <Link
-              href="/dashboard/upgrade"
-              className="mt-2 block text-center text-xs gradient-primary text-white py-1.5 rounded-md font-medium"
-            >
-              Passer à un plan
-            </Link>
-          </div>
-        )}
-
-        <nav className="flex-1 p-3 space-y-1">
-          {navItems.map((item) => {
-            const isActive = item.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(item.href);
-
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-200 ${
-                  isActive
-                    ? "bg-primary-50 text-primary-600 font-medium"
-                    : "text-stone-600 hover:bg-stone-100"
-                } ${collapsed ? "justify-center" : ""}`}
-                title={collapsed ? item.label : undefined}
-              >
-                {item.icon}
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            );
-          })}
-
-          {/* Formulaire link */}
-          {profile && (
-            <a
-              href={`/collect/${profile.collect_link_id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-200 text-stone-600 hover:bg-stone-100 ${
-                collapsed ? "justify-center" : ""
-              }`}
-              title={collapsed ? "Formulaire" : undefined}
-            >
+    <ProfileContext.Provider value={{ profile, trialDaysLeft, isExpired }}>
+      <div className="min-h-screen bg-stone-50 flex">
+        {/* Sidebar */}
+        <aside className={`${collapsed ? "w-16" : "w-64"} bg-white border-r border-stone-200 flex flex-col transition-all duration-200 shrink-0 sticky top-0 h-screen`}>
+          {/* Logo */}
+          <div className="h-16 flex items-center justify-between px-4 border-b border-stone-200">
+            {!collapsed && (
+              <Link href="/dashboard" className="text-xl font-bold text-primary-500 font-serif">Louvi</Link>
+            )}
+            <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors duration-200 text-stone-500">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
-              {!collapsed && <span>Formulaire</span>}
-            </a>
-          )}
-        </nav>
+            </button>
+          </div>
 
-        <div className="p-3 border-t border-stone-200">
-          {/* Plan badge */}
-          {!collapsed && profile && (
-            <div className="px-3 mb-3 flex items-center gap-2">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                profile.plan === "trial"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : profile.plan === "pro"
-                  ? "bg-primary-100 text-primary-700"
-                  : profile.plan === "business"
-                  ? "bg-stone-800 text-white"
-                  : "bg-stone-100 text-stone-600"
-              }`}>
-                {planLabel}
-              </span>
+          {/* Trial banner */}
+          {!collapsed && profile?.plan === "trial" && (
+            <div className={`mx-3 mt-3 p-3 rounded-lg border ${trialDaysLeft <= 2 ? "bg-red-50 border-red-200" : "bg-primary-50 border-primary-100"}`}>
+              <div className="flex items-center gap-2 mb-1">
+                {trialDaysLeft <= 2 ? (
+                  <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                <p className={`text-xs font-semibold ${trialDaysLeft <= 2 ? "text-red-700" : "text-primary-700"}`}>
+                  Essai gratuit
+                </p>
+              </div>
+              <p className={`text-xs ${trialDaysLeft <= 2 ? "text-red-600" : "text-primary-600"}`}>
+                {trialDaysLeft > 0
+                  ? `${trialDaysLeft} jour${trialDaysLeft > 1 ? "s" : ""} restant${trialDaysLeft > 1 ? "s" : ""}`
+                  : "Expiré"}
+              </p>
+              {/* Progress bar */}
+              <div className="mt-2 h-1.5 bg-white/50 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${trialDaysLeft <= 2 ? "bg-red-500" : "bg-primary-500"}`}
+                  style={{ width: `${Math.max(0, (trialDaysLeft / 7) * 100)}%` }}
+                />
+              </div>
+              <Link
+                href="/dashboard/upgrade"
+                className={`mt-2.5 block text-center text-xs py-1.5 rounded-md font-medium transition-colors ${
+                  trialDaysLeft <= 2
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "gradient-primary text-white"
+                }`}
+              >
+                Choisir un plan
+              </Link>
             </div>
           )}
-          <button
-            onClick={handleLogout}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition-colors duration-200 w-full ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-            </svg>
-            {!collapsed && <span>Déconnexion</span>}
-          </button>
-          {!collapsed && profile && (
-            <p className="mt-2 px-3 text-xs text-stone-400 truncate">{profile.company_name}</p>
-          )}
-        </div>
-      </aside>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
-        <div className="p-8">{children}</div>
-      </main>
-    </div>
+          {/* Nav */}
+          <nav className="flex-1 p-3 space-y-1 mt-1">
+            {navItems.map((item) => {
+              const isActive = item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-200 ${
+                    isActive ? "bg-primary-50 text-primary-600 font-medium" : "text-stone-600 hover:bg-stone-100"
+                  } ${collapsed ? "justify-center" : ""}`}
+                  title={collapsed ? item.label : undefined}
+                >
+                  {item.icon}
+                  {!collapsed && <span>{item.label}</span>}
+                </Link>
+              );
+            })}
+            {/* Formulaire external link */}
+            {profile && (
+              <a
+                href={`/collect/${profile.collect_link_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition-colors duration-200 ${collapsed ? "justify-center" : ""}`}
+                title={collapsed ? "Formulaire" : undefined}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+                {!collapsed && <span>Formulaire</span>}
+              </a>
+            )}
+          </nav>
+
+          {/* Bottom */}
+          <div className="p-3 border-t border-stone-200">
+            {!collapsed && profile && (
+              <div className="px-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    profile.plan === "trial" ? "bg-yellow-100 text-yellow-700"
+                    : profile.plan === "starter" ? "bg-blue-100 text-blue-700"
+                    : profile.plan === "pro" ? "bg-primary-100 text-primary-700"
+                    : profile.plan === "business" ? "bg-stone-800 text-white"
+                    : "bg-stone-100 text-stone-600"
+                  }`}>
+                    {planLabel}
+                  </span>
+                </div>
+                <p className="text-xs text-stone-400 mt-1.5 truncate">{profile.company_name}</p>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-600 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 w-full ${collapsed ? "justify-center" : ""}`}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+              {!collapsed && <span>Déconnexion</span>}
+            </button>
+          </div>
+        </aside>
+
+        {/* Main */}
+        <main className="flex-1 overflow-auto">
+          {/* Top trial warning banner */}
+          {profile?.plan === "trial" && trialDaysLeft <= 3 && trialDaysLeft > 0 && pathname !== "/dashboard/upgrade" && (
+            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-2.5 text-sm flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>
+                  Votre essai gratuit expire dans <strong>{trialDaysLeft} jour{trialDaysLeft > 1 ? "s" : ""}</strong>
+                </span>
+              </div>
+              <Link href="/dashboard/upgrade" className="bg-white text-orange-600 px-4 py-1 rounded-md text-xs font-semibold hover:bg-orange-50 transition-colors">
+                Passer à un plan
+              </Link>
+            </div>
+          )}
+          <div className="p-8">{children}</div>
+        </main>
+      </div>
+    </ProfileContext.Provider>
   );
 }
