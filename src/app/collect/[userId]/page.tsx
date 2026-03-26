@@ -12,7 +12,8 @@ export default function CollectPage() {
   const supabase = createClient();
 
   const [step, setStep] = useState(1);
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -78,7 +79,7 @@ export default function CollectPage() {
   };
 
   const canNext = () => {
-    if (step === 1) return name.trim().length > 0;
+    if (step === 1) return firstName.trim().length > 0 && lastName.trim().length > 0;
     if (step === 2) return rating > 0;
     if (step === 3) return content.trim().length >= 10 && gdprConsent;
     return false;
@@ -140,7 +141,7 @@ export default function CollectPage() {
 
       const { error: insertError } = await supabase.from("testimonials").insert({
         owner_id: profile.id,
-        author_name: name.trim(),
+        author_name: `${firstName.trim()} ${lastName.trim()}`,
         author_role: formMode === "b2b" ? (role.trim() || null) : null,
         author_company: formMode === "b2b" ? (company.trim() || null) : null,
         author_photo_url: photoUrl,
@@ -286,17 +287,31 @@ export default function CollectPage() {
               </div>
               <p className="text-center text-xs text-stone-400 -mt-2">Optionnel — max 2 Mo</p>
 
-              <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">
-                  Nom complet <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Jean Dupont"
-                  className="w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                    Prénom <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Jean"
+                    className="w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                    Nom <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Dupont"
+                    className="w-full px-4 py-2.5 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                  />
+                </div>
               </div>
 
               {formMode === "b2b" && (

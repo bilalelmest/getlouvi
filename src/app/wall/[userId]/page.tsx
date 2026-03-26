@@ -82,7 +82,7 @@ export default function PublicWallPage() {
             {testimonials.map((t) => (
               <div key={t.id} className={`${cardBg} rounded-xl border ${border} p-5`}>
                 <div className="flex items-center gap-3 mb-3">
-                  <Avatar name={t.author_name} size="sm" />
+                  <Avatar name={t.author_name} photoUrl={t.author_photo_url} size="sm" />
                   <div>
                     <p className={`font-semibold text-sm ${text}`}>{t.author_name}</p>
                     <p className={`text-xs ${subtext}`}>
@@ -102,7 +102,7 @@ export default function PublicWallPage() {
             {testimonials.map((t) => (
               <div key={t.id} className={`${cardBg} rounded-xl border ${border} p-5 min-w-[300px] snap-center shrink-0`}>
                 <div className="flex items-center gap-3 mb-3">
-                  <Avatar name={t.author_name} size="sm" />
+                  <Avatar name={t.author_name} photoUrl={t.author_photo_url} size="sm" />
                   <div>
                     <p className={`font-semibold text-sm ${text}`}>{t.author_name}</p>
                     <p className={`text-xs ${subtext}`}>
@@ -121,7 +121,7 @@ export default function PublicWallPage() {
           <div className="space-y-3 max-w-xl mx-auto">
             {testimonials.map((t) => (
               <div key={t.id} className={`${cardBg} rounded-xl border ${border} p-4 flex items-start gap-4`}>
-                <Avatar name={t.author_name} size="sm" />
+                <Avatar name={t.author_name} photoUrl={t.author_photo_url} size="sm" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <p className={`font-semibold text-sm ${text}`}>{t.author_name}</p>
@@ -205,7 +205,7 @@ export default function PublicWallPage() {
                 className="bg-white rounded-xl border border-stone-200 p-6 hover:shadow-md transition-shadow duration-200"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <Avatar name={t.author_name} />
+                  <Avatar name={t.author_name} photoUrl={t.author_photo_url} />
                   <div>
                     <p className="font-semibold text-stone-950 text-sm">{t.author_name}</p>
                     <p className="text-xs text-stone-500">

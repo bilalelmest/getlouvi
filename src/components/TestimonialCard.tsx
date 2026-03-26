@@ -25,7 +25,7 @@ export default function TestimonialCard({
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-start gap-3 mb-3">
-        <Avatar name={testimonial.author_name} />
+        <Avatar name={testimonial.author_name} photoUrl={testimonial.author_photo_url} />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-stone-950 truncate">
             {testimonial.author_name}

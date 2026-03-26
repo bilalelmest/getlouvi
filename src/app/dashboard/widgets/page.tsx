@@ -141,16 +141,12 @@ export default function WidgetsPage() {
                 return (
                   <button
                     key={s.value}
-                    onClick={() => !locked && setStyle(s.value)}
-                    disabled={locked}
+                    onClick={() => setStyle(s.value)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative ${
-                      locked
-                        ? "bg-stone-100 text-stone-400 cursor-not-allowed"
-                        : style === s.value
-                        ? "bg-primary-500 text-white shadow-md"
+                      style === s.value
+                        ? locked ? "bg-amber-500 text-white shadow-md" : "bg-primary-500 text-white shadow-md"
                         : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                     }`}
-                    title={locked ? "Disponible avec le plan Pro" : ""}
                   >
                     {locked && (
                       <svg className="w-3 h-3 absolute -top-1 -right-1 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
@@ -180,16 +176,12 @@ export default function WidgetsPage() {
                 Clair
               </button>
               <button
-                onClick={() => allowDarkTheme && setTheme("dark")}
-                disabled={!allowDarkTheme}
+                onClick={() => setTheme("dark")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 relative ${
-                  !allowDarkTheme
-                    ? "bg-stone-100 text-stone-400 cursor-not-allowed"
-                    : theme === "dark"
-                    ? "bg-primary-500 text-white shadow-md"
+                  theme === "dark"
+                    ? !allowDarkTheme ? "bg-amber-500 text-white shadow-md" : "bg-primary-500 text-white shadow-md"
                     : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                 }`}
-                title={!allowDarkTheme ? "Disponible avec le plan Pro" : ""}
               >
                 {!allowDarkTheme && (
                   <svg className="w-3 h-3 absolute -top-1 -right-1 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
@@ -207,7 +199,18 @@ export default function WidgetsPage() {
       </div>
 
       {/* Preview */}
-      <div className={`rounded-xl border ${border} p-8 mb-6 ${bg} transition-colors duration-300`}>
+      {(() => { const isStyleLocked = !allowedWidgets.includes(style); const isThemeLocked = theme === "dark" && !allowDarkTheme; const isLocked = isStyleLocked || isThemeLocked; return (
+      <>
+      <div className={`rounded-xl border ${border} p-8 mb-6 ${bg} transition-colors duration-300 relative`}>
+        {isLocked && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] rounded-xl z-10 flex flex-col items-center justify-center">
+            <svg className="w-8 h-8 text-amber-500 mb-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm font-semibold text-stone-800">Disponible avec le plan Pro</p>
+            <a href="/dashboard/upgrade" className="mt-2 text-xs gradient-primary text-white px-4 py-1.5 rounded-lg font-medium">Passer au Pro</a>
+          </div>
+        )}
         <h3 className={`text-center font-serif text-sm font-medium mb-6 ${subtext}`}>
           Aperçu — {styles.find((s) => s.value === style)?.label} ({theme === "light" ? "clair" : "sombre"})
         </h3>
@@ -217,7 +220,7 @@ export default function WidgetsPage() {
             {demoTestimonials.slice(0, 4).map((t) => (
               <div key={t.id} className={`${cardBg} rounded-xl border ${border} p-5`}>
                 <div className="flex items-center gap-3 mb-3">
-                  <Avatar name={t.author_name} size="sm" />
+                  <Avatar name={t.author_name} photoUrl={t.author_photo_url} size="sm" />
                   <div>
                     <p className={`font-semibold text-sm ${text}`}>{t.author_name}</p>
                     <p className={`text-xs ${subtext}`}>
@@ -241,7 +244,7 @@ export default function WidgetsPage() {
                   className={`${cardBg} rounded-xl border ${border} p-5 min-w-[300px] snap-center shrink-0`}
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <Avatar name={t.author_name} size="sm" />
+                    <Avatar name={t.author_name} photoUrl={t.author_photo_url} size="sm" />
                     <div>
                       <p className={`font-semibold text-sm ${text}`}>{t.author_name}</p>
                       <p className={`text-xs ${subtext}`}>
@@ -264,7 +267,7 @@ export default function WidgetsPage() {
                 key={t.id}
                 className={`${cardBg} rounded-xl border ${border} p-4 flex items-start gap-4`}
               >
-                <Avatar name={t.author_name} size="sm" />
+                <Avatar name={t.author_name} photoUrl={t.author_photo_url} size="sm" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <p className={`font-semibold text-sm ${text}`}>{t.author_name}</p>
@@ -306,48 +309,61 @@ export default function WidgetsPage() {
       </div>
 
       {/* Embed Code */}
-      <div className="bg-white rounded-xl border border-stone-200 p-6">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h3 className="font-semibold text-stone-950">Code d&apos;intégration</h3>
-            <p className="text-xs text-stone-500 mt-0.5">Copiez ce code et collez-le dans votre site web</p>
+      {isLocked ? (
+        <div className="bg-white rounded-xl border border-amber-200 p-6 text-center">
+          <p className="text-sm text-stone-600">
+            Passez au <strong>plan Pro</strong> pour utiliser ce widget et obtenir le code d&apos;intégration.
+          </p>
+          <a href="/dashboard/upgrade" className="inline-block mt-3 gradient-primary text-white px-5 py-2 rounded-lg text-sm font-medium">
+            Voir les plans
+          </a>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-stone-200 p-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="font-semibold text-stone-950">Code d&apos;intégration</h3>
+              <p className="text-xs text-stone-500 mt-0.5">Copiez ce code et collez-le dans votre site web</p>
+            </div>
+            <button
+              onClick={copyCode}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                copied
+                  ? "bg-success text-white"
+                  : "gradient-primary text-white shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
+              }`}
+            >
+              {copied ? "✓ Copié !" : "Copier le code"}
+            </button>
           </div>
-          <button
-            onClick={copyCode}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              copied
-                ? "bg-success text-white"
-                : "gradient-primary text-white shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
-            }`}
-          >
-            {copied ? "✓ Copié !" : "Copier le code"}
-          </button>
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setEmbedType("iframe")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                embedType === "iframe" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              iFrame
+            </button>
+            <button
+              onClick={() => setEmbedType("script")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                embedType === "script" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+              }`}
+            >
+              Script JS (SEO)
+            </button>
+          </div>
+          <pre className="bg-stone-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto">
+            <code>{getEmbedCode()}</code>
+          </pre>
+          {embedType === "script" && (
+            <p className="text-xs text-stone-500 mt-2">Le script injecte le widget directement dans le DOM — meilleur pour le SEO.</p>
+          )}
         </div>
-        <div className="flex gap-2 mb-3">
-          <button
-            onClick={() => setEmbedType("iframe")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              embedType === "iframe" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-            }`}
-          >
-            iFrame
-          </button>
-          <button
-            onClick={() => setEmbedType("script")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              embedType === "script" ? "bg-stone-900 text-white" : "bg-stone-100 text-stone-600 hover:bg-stone-200"
-            }`}
-          >
-            Script JS (SEO)
-          </button>
-        </div>
-        <pre className="bg-stone-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto">
-          <code>{getEmbedCode()}</code>
-        </pre>
-        {embedType === "script" && (
-          <p className="text-xs text-stone-500 mt-2">Le script injecte le widget directement dans le DOM — meilleur pour le SEO.</p>
-        )}
-      </div>
+      )}
+      </>
+      ); })()}
     </div>
   );
 }
