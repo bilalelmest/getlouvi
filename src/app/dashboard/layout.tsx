@@ -59,6 +59,7 @@ const navItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -67,6 +68,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const getProfile = async () => {
@@ -171,9 +177,101 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
       )}
+
       <div className="min-h-screen bg-stone-50 flex">
-        {/* Sidebar */}
-        <aside className={`${collapsed ? "w-16" : "w-64"} bg-white border-r border-stone-200 flex flex-col transition-all duration-200 shrink-0 sticky top-0 h-screen`}>
+        {/* ═══ Mobile Header ═══ */}
+        <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-stone-200 h-14 flex items-center justify-between px-4">
+          <Link href="/dashboard">
+            <Logo size={26} />
+          </Link>
+          <div className="flex items-center gap-2">
+            {profile?.plan === "trial" && (
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                trialDaysLeft <= 2 ? "bg-red-100 text-red-700" : "bg-primary-100 text-primary-700"
+              }`}>
+                {trialDaysLeft > 0 ? `${trialDaysLeft}j restants` : "Expiré"}
+              </span>
+            )}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-stone-600 rounded-lg hover:bg-stone-100 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"} />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* ═══ Mobile Slide-down Menu ═══ */}
+        <div className={`md:hidden fixed top-14 left-0 right-0 z-30 bg-white border-b border-stone-200 shadow-lg transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+          <div className="p-3 space-y-1">
+            {profile && (
+              <div className="px-3 py-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    profile.plan === "trial" ? "bg-yellow-100 text-yellow-700"
+                    : profile.plan === "starter" ? "bg-blue-100 text-blue-700"
+                    : profile.plan === "pro" ? "bg-primary-100 text-primary-700"
+                    : profile.plan === "business" ? "bg-stone-800 text-white"
+                    : "bg-stone-100 text-stone-600"
+                  }`}>
+                    {planLabel}
+                  </span>
+                  <span className="text-xs text-stone-400 truncate">{profile.company_name}</span>
+                </div>
+              </div>
+            )}
+            {profile && (
+              <a
+                href={`/collect/${profile.collect_link_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+                <span>Voir le formulaire</span>
+              </a>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-600 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+              </svg>
+              <span>Déconnexion</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ═══ Mobile Bottom Navigation ═══ */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-stone-200 safe-area-bottom">
+          <div className="flex items-center justify-around h-16">
+            {navItems.map((item) => {
+              const isActive = item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors duration-200 ${
+                    isActive ? "text-primary-600" : "text-stone-400"
+                  }`}
+                >
+                  {item.icon}
+                  <span className="text-[10px] font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ═══ Desktop Sidebar ═══ */}
+        <aside className={`hidden md:flex ${collapsed ? "w-16" : "w-64"} bg-white border-r border-stone-200 flex-col transition-all duration-200 shrink-0 sticky top-0 h-screen`}>
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-stone-200">
             {!collapsed && (
@@ -297,27 +395,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </aside>
 
-        {/* Main */}
+        {/* ═══ Main Content ═══ */}
         <main className="flex-1 overflow-auto">
           {/* Top trial warning banner */}
           {profile?.plan === "trial" && trialDaysLeft <= 3 && trialDaysLeft > 0 && pathname !== "/dashboard/upgrade" && (
-            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-2.5 text-sm flex items-center justify-between">
+            <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 md:px-6 py-2.5 text-sm flex items-center justify-between mt-14 md:mt-0">
               <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>
-                  Votre essai gratuit expire dans <strong>{trialDaysLeft} jour{trialDaysLeft > 1 ? "s" : ""}</strong>
+                <span className="text-xs md:text-sm">
+                  Essai expire dans <strong>{trialDaysLeft}j</strong>
                 </span>
               </div>
-              <Link href="/dashboard/upgrade" className="bg-white text-orange-600 px-4 py-1 rounded-md text-xs font-semibold hover:bg-orange-50 transition-colors">
-                Passer à un plan
+              <Link href="/dashboard/upgrade" className="bg-white text-orange-600 px-3 md:px-4 py-1 rounded-md text-xs font-semibold hover:bg-orange-50 transition-colors shrink-0">
+                Upgrader
               </Link>
             </div>
           )}
-          <div className="p-8">{children}</div>
+          {/* Add top padding on mobile for header, bottom padding for bottom nav */}
+          <div className="p-4 md:p-8 pt-18 md:pt-8 pb-24 md:pb-8">{children}</div>
         </main>
       </div>
+
+      {/* Overlay when mobile menu is open */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-20 bg-black/20"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
     </ProfileContext.Provider>
   );
 }
