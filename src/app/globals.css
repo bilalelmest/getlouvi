@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     background-color: #FAFAF9;
     color: #0C0A09;
@@ -15,6 +18,7 @@
   }
 }
 
+/* ─── Fade in up (scroll reveal) ─── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -30,23 +34,143 @@
   animation: fadeInUp 0.6s ease-out forwards;
   opacity: 0;
 }
-
 .animate-fade-in-up-delay-1 {
   animation: fadeInUp 0.6s ease-out 0.1s forwards;
   opacity: 0;
 }
-
 .animate-fade-in-up-delay-2 {
   animation: fadeInUp 0.6s ease-out 0.2s forwards;
   opacity: 0;
 }
-
 .animate-fade-in-up-delay-3 {
   animation: fadeInUp 0.6s ease-out 0.3s forwards;
   opacity: 0;
 }
 
-/* Masonry layout */
+/* ─── Card hover lift ─── */
+.card-hover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Button hover scale + glow ─── */
+.btn-hover {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-hover:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+.btn-hover:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ─── Nav link animated underline ─── */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #7C3AED;
+  border-radius: 1px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-link:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* ─── Platform logo hover ─── */
+.platform-logo {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.platform-logo:hover {
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+
+/* ─── Pricing card hover ─── */
+.pricing-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pricing-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(124, 58, 237, 0.1);
+}
+
+/* ─── Testimonial card hover ─── */
+.testimonial-hover {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+}
+.testimonial-hover:hover {
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+/* ─── Feature icon hover ─── */
+.feature-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+}
+.group:hover .feature-icon {
+  transform: scale(1.1) rotate(-3deg);
+  background-color: #EDE9FE;
+}
+
+/* ─── Gradient text shimmer ─── */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.text-shimmer {
+  background: linear-gradient(90deg, #7C3AED 0%, #4F46E5 25%, #A78BFA 50%, #4F46E5 75%, #7C3AED 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ─── Floating animation (subtle) ─── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ─── CTA section pulse glow ─── */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 30px rgba(124, 58, 237, 0.2); }
+  50% { box-shadow: 0 0 60px rgba(124, 58, 237, 0.35); }
+}
+.cta-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* ─── Smooth focus styles ─── */
+input:focus, textarea:focus, select:focus {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* ─── Step number counter animation ─── */
+.step-number {
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+.group:hover .step-number {
+  background-color: #7C3AED;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* ─── Masonry layout ─── */
 .masonry-grid {
   column-count: 3;
   column-gap: 1.5rem;

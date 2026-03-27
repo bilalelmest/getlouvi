@@ -141,24 +141,24 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-stone-200 z-50">
+      <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-stone-200/80 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/">
+          <Link href="/" className="transition-transform duration-200 hover:scale-105">
             <Logo size={32} />
           </Link>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#fonctionnalites" className="text-stone-600 hover:text-stone-950 transition-colors duration-200 text-sm">
+            <a href="#fonctionnalites" className="nav-link text-stone-600 hover:text-stone-950 transition-colors duration-200 text-sm">
               Fonctionnalités
             </a>
-            <a href="#tarifs" className="text-stone-600 hover:text-stone-950 transition-colors duration-200 text-sm">
+            <a href="#tarifs" className="nav-link text-stone-600 hover:text-stone-950 transition-colors duration-200 text-sm">
               Tarifs
             </a>
-            <Link href="/login" className="text-stone-600 hover:text-stone-950 transition-colors duration-200 text-sm">
+            <Link href="/login" className="nav-link text-stone-600 hover:text-stone-950 transition-colors duration-200 text-sm">
               Connexion
             </Link>
             <Link
               href="/signup"
-              className="gradient-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow duration-200"
+              className="btn-hover gradient-primary text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-all duration-200"
             >
               Essai gratuit 7 jours
             </Link>
@@ -166,7 +166,7 @@ export default function LandingPage() {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenu(!mobileMenu)}
-            className="md:hidden p-2 text-stone-600"
+            className="md:hidden p-2 text-stone-600 transition-transform duration-200 active:scale-90"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d={mobileMenu ? "M6 18L18 6M6 6l12 12" : "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"} />
@@ -174,8 +174,8 @@ export default function LandingPage() {
           </button>
         </div>
         {/* Mobile menu */}
-        {mobileMenu && (
-          <div className="md:hidden border-t border-stone-200 bg-white px-6 py-4 space-y-3">
+        <div className={`md:hidden border-t border-stone-200 bg-white px-6 overflow-hidden transition-all duration-300 ease-in-out ${mobileMenu ? "max-h-60 py-4 opacity-100" : "max-h-0 py-0 opacity-0"}`}>
+          <div className="space-y-3">
             <a href="#fonctionnalites" className="block text-stone-600 text-sm" onClick={() => setMobileMenu(false)}>Fonctionnalités</a>
             <a href="#tarifs" className="block text-stone-600 text-sm" onClick={() => setMobileMenu(false)}>Tarifs</a>
             <Link href="/login" className="block text-stone-600 text-sm">Connexion</Link>
@@ -183,14 +183,14 @@ export default function LandingPage() {
               Essai gratuit 7 jours
             </Link>
           </div>
-        )}
+        </div>
       </nav>
 
       {/* Hero */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <AnimatedSection>
-            <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-600 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-600 px-4 py-1.5 rounded-full text-sm font-medium mb-6 animate-float">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
@@ -199,7 +199,9 @@ export default function LandingPage() {
           </AnimatedSection>
           <AnimatedSection delay={100}>
             <h1 className="font-serif text-5xl md:text-6xl font-bold text-stone-950 leading-tight">
-              Vos clients satisfaits sont votre meilleur argument de vente
+              Vos clients satisfaits sont votre{" "}
+              <span className="text-shimmer">meilleur argument</span>{" "}
+              de vente
             </h1>
           </AnimatedSection>
           <AnimatedSection delay={200}>
@@ -221,11 +223,11 @@ export default function LandingPage() {
                 value={heroEmail}
                 onChange={(e) => setHeroEmail(e.target.value)}
                 placeholder="votre@email.com"
-                className="w-full sm:w-80 px-5 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                className="w-full sm:w-80 px-5 py-3 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm transition-all duration-200"
               />
               <button
                 type="submit"
-                className="w-full sm:w-auto gradient-primary text-white px-8 py-3 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-shadow duration-200 text-center"
+                className="btn-hover w-full sm:w-auto gradient-primary text-white px-8 py-3 rounded-lg text-sm font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-all duration-200 text-center"
               >
                 Essai gratuit 7 jours
               </button>
@@ -255,8 +257,8 @@ export default function LandingPage() {
                   { name: "Squarespace", logo: "/logos/squarespace.svg" },
                   { name: "HTML", logo: "/logos/html5.svg" },
                 ].map((platform) => (
-                  <div key={platform.name} className="flex items-center gap-2 text-stone-500">
-                    <img src={platform.logo} alt={platform.name} className="w-6 h-6 opacity-60" />
+                  <div key={platform.name} className="platform-logo flex items-center gap-2 text-stone-500 cursor-default opacity-60">
+                    <img src={platform.logo} alt={platform.name} className="w-6 h-6" />
                     <span className="text-sm font-medium">{platform.name}</span>
                   </div>
                 ))}
@@ -280,11 +282,11 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((f, i) => (
               <AnimatedSection key={f.title} delay={i * 100}>
-                <div className="p-6 rounded-xl border border-stone-200 hover:border-primary-300 hover:shadow-lg transition-all duration-200 h-full">
-                  <div className="w-10 h-10 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center mb-4">
+                <div className="group card-hover p-6 rounded-xl border border-stone-200 hover:border-primary-200 h-full bg-white cursor-default">
+                  <div className="feature-icon w-10 h-10 rounded-lg bg-primary-50 text-primary-500 flex items-center justify-center mb-4">
                     {f.icon}
                   </div>
-                  <h3 className="font-semibold text-stone-950 mb-2">{f.title}</h3>
+                  <h3 className="font-semibold text-stone-950 mb-2 group-hover:text-primary-600 transition-colors duration-200">{f.title}</h3>
                   <p className="text-sm text-stone-600 leading-relaxed">{f.description}</p>
                 </div>
               </AnimatedSection>
@@ -307,14 +309,14 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {steps.map((step, i) => (
               <AnimatedSection key={step.number} delay={i * 120}>
-                <div className="relative bg-white rounded-2xl border border-stone-200 p-8 text-center hover:shadow-lg transition-shadow duration-300">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-50 text-primary-500 mb-5">
+                <div className="group card-hover relative bg-white rounded-2xl border border-stone-200 p-8 text-center cursor-default">
+                  <div className="feature-icon inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-50 text-primary-500 mb-5">
                     {step.icon}
                   </div>
-                  <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-sm font-bold text-stone-400">
+                  <div className="step-number absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-sm font-bold text-stone-400">
                     {step.number}
                   </div>
-                  <h3 className="text-lg font-bold text-stone-950 mb-3">{step.title}</h3>
+                  <h3 className="text-lg font-bold text-stone-950 mb-3 group-hover:text-primary-600 transition-colors duration-200">{step.title}</h3>
                   <p className="text-sm text-stone-600 leading-relaxed">{step.description}</p>
                 </div>
               </AnimatedSection>
@@ -343,7 +345,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {demoTestimonials.map((t, i) => (
                 <AnimatedSection key={t.name} delay={i * 80}>
-                  <div className="bg-stone-800 rounded-xl border border-stone-700 p-5">
+                  <div className="testimonial-hover bg-stone-800 rounded-xl border border-stone-700 p-5 cursor-default">
                     <div className="flex items-center gap-3 mb-3">
                       <Avatar name={t.name} size="sm" />
                       <div>
@@ -379,22 +381,22 @@ export default function LandingPage() {
 
             {/* Toggle */}
             <div className="flex items-center justify-center gap-3 mb-14">
-              <span className={`text-sm ${!annual ? "text-stone-950 font-medium" : "text-stone-500"}`}>
+              <span className={`text-sm transition-colors duration-200 ${!annual ? "text-stone-950 font-medium" : "text-stone-500"}`}>
                 Mensuel
               </span>
               <button
                 onClick={() => setAnnual(!annual)}
-                className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${
+                className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
                   annual ? "bg-primary-500" : "bg-stone-300"
                 }`}
               >
                 <div
-                  className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform duration-200 ${
+                  className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 ease-in-out ${
                     annual ? "translate-x-7" : "translate-x-0.5"
                   }`}
                 />
               </button>
-              <span className={`text-sm ${annual ? "text-stone-950 font-medium" : "text-stone-500"}`}>
+              <span className={`text-sm transition-colors duration-200 ${annual ? "text-stone-950 font-medium" : "text-stone-500"}`}>
                 Annuel{" "}
                 <span className="text-primary-500 font-medium bg-primary-50 px-2 py-0.5 rounded-full text-xs">
                   -20%
@@ -412,14 +414,14 @@ export default function LandingPage() {
               return (
                 <AnimatedSection key={plan.name} delay={i * 150}>
                   <div
-                    className={`rounded-xl border p-8 relative h-full flex flex-col ${
+                    className={`pricing-card rounded-xl border p-8 relative h-full flex flex-col bg-white ${
                       plan.popular
                         ? "border-primary-500 shadow-xl shadow-primary-500/10 scale-105"
-                        : "border-stone-200"
+                        : "border-stone-200 hover:border-primary-300"
                     }`}
                   >
                     {plan.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 gradient-primary text-white text-xs px-4 py-1 rounded-full font-medium">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 gradient-primary text-white text-xs px-4 py-1 rounded-full font-medium shadow-lg shadow-primary-500/25">
                         Populaire
                       </div>
                     )}
@@ -445,7 +447,7 @@ export default function LandingPage() {
                     </ul>
                     <Link
                       href="/signup"
-                      className={`block text-center py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`btn-hover block text-center py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                         plan.popular
                           ? "gradient-primary text-white shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
                           : "border border-stone-300 text-stone-700 hover:border-primary-500 hover:text-primary-500"
@@ -464,7 +466,7 @@ export default function LandingPage() {
       {/* CTA Final */}
       <section className="py-20 px-6">
         <AnimatedSection>
-          <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-12 shadow-2xl shadow-primary-500/20">
+          <div className="cta-glow max-w-3xl mx-auto text-center bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-12 shadow-2xl shadow-primary-500/20">
             <h2 className="font-serif text-3xl font-bold text-white mb-4">
               Prêt à transformer vos avis en conversions ?
             </h2>
@@ -473,7 +475,7 @@ export default function LandingPage() {
             </p>
             <Link
               href="/signup"
-              className="inline-block bg-white text-primary-600 px-8 py-3 rounded-lg text-sm font-semibold hover:bg-primary-50 transition-colors duration-200 shadow-lg"
+              className="btn-hover inline-block bg-white text-primary-600 px-8 py-3 rounded-lg text-sm font-semibold hover:bg-primary-50 transition-all duration-200 shadow-lg"
             >
               Essai gratuit 7 jours
             </Link>
@@ -485,15 +487,17 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-stone-200">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <Logo size={28} />
+          <Link href="/" className="transition-transform duration-200 hover:scale-105">
+            <Logo size={28} />
+          </Link>
           <p className="text-sm text-stone-500">
             © {new Date().getFullYear()} Louvi. Tous droits réservés.
           </p>
           <div className="flex gap-6 text-sm text-stone-500">
-            <Link href="/mentions-legales" className="hover:text-stone-700 transition-colors duration-200">
+            <Link href="/mentions-legales" className="hover:text-primary-500 transition-colors duration-200">
               Mentions légales
             </Link>
-            <Link href="/confidentialite" className="hover:text-stone-700 transition-colors duration-200">
+            <Link href="/confidentialite" className="hover:text-primary-500 transition-colors duration-200">
               Confidentialité
             </Link>
           </div>
