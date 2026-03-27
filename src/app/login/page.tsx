@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -59,8 +60,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-stone-50 flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold text-primary-500 font-serif">
-            Louvi
+          <Link href="/" className="inline-block">
+            <Logo size={36} />
           </Link>
           <h1 className="mt-6 text-2xl font-bold text-stone-950">
             Bon retour parmi nous

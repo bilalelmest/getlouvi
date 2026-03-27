@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/client";
 
 function SignupForm() {
@@ -67,8 +68,8 @@ function SignupForm() {
     return (
       <div className="min-h-screen bg-stone-50 flex items-center justify-center px-6">
         <div className="w-full max-w-md text-center">
-          <Link href="/" className="text-3xl font-bold text-primary-500 font-serif">
-            Louvi
+          <Link href="/" className="inline-block">
+            <Logo size={36} />
           </Link>
           <div className="mt-8 bg-white rounded-xl border border-stone-200 p-8 shadow-sm">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-50 mb-5">
@@ -107,8 +108,8 @@ function SignupForm() {
     <div className="min-h-screen bg-stone-50 flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold text-primary-500 font-serif">
-            Louvi
+          <Link href="/" className="inline-block">
+            <Logo size={36} />
           </Link>
           <h1 className="mt-6 text-2xl font-bold text-stone-950">
             Créez votre compte

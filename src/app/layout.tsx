@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Louvi — Collectez et affichez vos témoignages clients",
   description:
     "Louvi est l'outil SaaS pour collecter, gérer et afficher les témoignages de vos clients satisfaits. Boostez votre crédibilité avec un Wall of Love.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

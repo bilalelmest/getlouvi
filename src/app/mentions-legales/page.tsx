@@ -1,11 +1,12 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function MentionsLegalesPage() {
   return (
     <div className="min-h-screen bg-stone-50">
       <nav className="bg-white border-b border-stone-200 px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-primary-500 font-serif">Louvi</Link>
+          <Link href="/"><Logo size={28} /></Link>
           <Link href="/" className="text-sm text-stone-600 hover:text-stone-950">Retour au site</Link>
         </div>
       </nav>

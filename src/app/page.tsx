@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import StarRating from "@/components/StarRating";
 import AnimatedSection from "@/components/AnimatedSection";
+import Logo from "@/components/Logo";
 
 const features = [
   {
@@ -142,8 +143,8 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-stone-200 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold text-primary-500 font-serif">
-            Louvi
+          <Link href="/">
+            <Logo size={32} />
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a href="#fonctionnalites" className="text-stone-600 hover:text-stone-950 transition-colors duration-200 text-sm">
@@ -484,7 +485,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-stone-200">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-2xl font-bold text-primary-500 font-serif">Louvi</div>
+          <Logo size={28} />
           <p className="text-sm text-stone-500">
             © {new Date().getFullYear()} Louvi. Tous droits réservés.
           </p>

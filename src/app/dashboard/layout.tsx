@@ -3,6 +3,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
 import { createClient } from "@/lib/supabase/client";
 import { Profile, PLAN_LIMITS } from "@/lib/types";
 
@@ -176,7 +177,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-stone-200">
             {!collapsed && (
-              <Link href="/dashboard" className="text-xl font-bold text-primary-500 font-serif">Louvi</Link>
+              <Link href="/dashboard">
+                <Logo size={28} />
+              </Link>
             )}
             <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 rounded-lg hover:bg-stone-100 transition-colors duration-200 text-stone-500">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
