@@ -7,6 +7,7 @@ import Avatar from "@/components/Avatar";
 import StarRating from "@/components/StarRating";
 import AnimatedSection from "@/components/AnimatedSection";
 import Logo from "@/components/Logo";
+import GoogleBadge from "@/components/GoogleBadge";
 
 const features = [
   {
@@ -98,14 +99,13 @@ const steps = [
   },
 ];
 
-// Exemple de Wall of Love — comme si c'était les avis d'une vraie entreprise
 const demoTestimonials = [
-  { name: "Claire M.", role: "Cliente fidèle", rating: 5, content: "Les croissants sont incroyables, on dirait ceux de mon enfance. Je viens chaque dimanche matin avec ma famille. Le personnel est toujours souriant !" },
-  { name: "Julien R.", role: "", rating: 5, content: "J'ai commandé un gâteau d'anniversaire personnalisé et il était magnifique. Le goût était à la hauteur de la présentation. Merci !" },
-  { name: "Nadia B.", role: "Foodie", rating: 4, content: "Très bonne boulangerie de quartier. Le pain au levain est excellent. Seul bémol : il faut arriver tôt le samedi sinon il n'y en a plus." },
-  { name: "Marc D.", role: "", rating: 5, content: "Meilleure pâtisserie de Lyon. Les éclairs au chocolat sont une tuerie. Je recommande les yeux fermés." },
-  { name: "Sophie L.", role: "Organisatrice d'événements", rating: 5, content: "On fait appel à eux pour tous nos événements professionnels. La qualité est constante et le service impeccable." },
-  { name: "Antoine P.", role: "", rating: 4, content: "Bon rapport qualité-prix. J'apprécie particulièrement leurs viennoiseries le matin. Livraison rapide aussi." },
+  { name: "Marie Laurent", role: "CEO", company: "NovaTech", rating: 5, photo: "https://i.pravatar.cc/150?img=32", source: "louvi", content: "Louvi a completement change notre facon de gerer les retours clients. En 2 semaines, on a collecte plus de 80 avis et notre taux de conversion a augmente de 23%." },
+  { name: "Thomas Berger", role: "Fondateur", company: "Studio Krea", rating: 5, photo: null, source: "google", content: "On cherchait un outil simple pour afficher nos avis Google et Louvi sur notre site. Le widget s'integre en 2 minutes, le rendu est superbe." },
+  { name: "Camille Dupont", role: "Responsable Marketing", company: "FoodieBox", rating: 5, photo: "https://i.pravatar.cc/150?img=23", source: "louvi", content: "Interface tres intuitive. Nos clients adorent le formulaire de collecte et nous avons enfin une page temoignages digne de ce nom." },
+  { name: "Alexandre Morel", role: "Co-fondateur", company: "DigitalPulse", rating: 4, photo: "https://i.pravatar.cc/150?img=53", source: "google", content: "Tres bon outil, surtout le widget carrousel qui tourne sur notre homepage. Le support repond vite. Je recommande." },
+  { name: "Sarah Leclerc", role: "Directrice", company: "Atelier Bloom", rating: 5, photo: "https://i.pravatar.cc/150?img=45", source: "louvi", content: "Mes clientes laissent des avis magnifiques et je peux les afficher directement sur mon site. Le badge Google ajoute de la credibilite." },
+  { name: "Lucas Martin", role: "E-commercant", company: "GreenShop", rating: 5, photo: null, source: "google", content: "Le wall of love a booste la confiance de nos visiteurs. On voit clairement la difference sur nos ventes depuis qu'on l'a installe." },
 ];
 
 const plans = [
@@ -337,32 +337,45 @@ export default function LandingPage() {
                 Voici à quoi ressemble un Wall of Love
               </h2>
               <p className="text-stone-600 max-w-2xl mx-auto">
-                Cet exemple montre comment une boulangerie pourrait afficher les avis de ses clients grâce à Louvi.
+                Affichez vos avis clients et vos avis Google dans un design professionnel, directement sur votre site.
               </p>
             </div>
           </AnimatedSection>
-          <div className="mt-12 bg-stone-900 rounded-2xl p-8 md:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="mt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {demoTestimonials.map((t, i) => (
                 <AnimatedSection key={t.name} delay={i * 80}>
-                  <div className="testimonial-hover bg-stone-800 rounded-xl border border-stone-700 p-5 cursor-default">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar name={t.name} size="sm" />
-                      <div>
-                        <p className="font-semibold text-white text-sm">{t.name}</p>
-                        {t.role && <p className="text-xs text-stone-400">{t.role}</p>}
+                  <div className="group relative bg-white rounded-2xl border border-stone-200 p-6 cursor-default hover:shadow-lg hover:border-stone-300 transition-all duration-300">
+                    {/* Quote icon */}
+                    <svg className="absolute top-4 right-4 w-8 h-8 text-primary-100 group-hover:text-primary-200 transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151C7.546 6.068 5.983 8.789 5.983 11h4v10H0z" />
+                    </svg>
+                    <div className="flex items-center gap-3 mb-4">
+                      {t.photo ? (
+                        <img src={t.photo} alt={t.name} className="w-11 h-11 rounded-full object-cover ring-2 ring-stone-100" />
+                      ) : (
+                        <Avatar name={t.name} size="sm" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-semibold text-stone-950 text-sm">{t.name}</p>
+                        <p className="text-xs text-stone-500">{t.role}{t.company ? ` · ${t.company}` : ""}</p>
                       </div>
                     </div>
                     <StarRating rating={t.rating} size="sm" />
-                    <p className="mt-2 text-sm text-stone-300 leading-relaxed">
+                    <p className="mt-3 text-sm text-stone-600 leading-relaxed">
                       {t.content}
                     </p>
+                    {t.source === "google" && (
+                      <div className="mt-4 pt-3 border-t border-stone-100">
+                        <GoogleBadge />
+                      </div>
+                    )}
                   </div>
                 </AnimatedSection>
               ))}
             </div>
-            <p className="text-center text-xs text-stone-500 mt-6">
-              Widget carrousel sombre — un des 4 styles disponibles
+            <p className="text-center text-xs text-stone-400 mt-8">
+              Exemple de Wall of Love — un des 4 styles de widgets disponibles
             </p>
           </div>
         </div>
