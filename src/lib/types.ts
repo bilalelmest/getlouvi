@@ -22,6 +22,7 @@ export interface Testimonial {
   content: string;
   status: "pending" | "approved" | "rejected";
   tag: string | null;
+  source: "louvi" | "google" | null;
   gdpr_consent: boolean;
   created_at: string;
 }

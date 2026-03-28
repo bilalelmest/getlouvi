@@ -99,25 +99,25 @@ export default function WidgetsPage() {
       id: "demo-1", owner_id: "", author_name: "Marie Dupont", author_role: "CEO",
       author_company: "TechStart", author_photo_url: null, rating: 5,
       content: "Un outil incroyable qui a transformé notre approche client. Je recommande vivement !",
-      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
+      status: "approved", tag: null, gdpr_consent: true, source: null, created_at: new Date().toISOString(),
     },
     {
       id: "demo-2", owner_id: "", author_name: "Thomas Bernard", author_role: "CTO",
       author_company: "DataFlow", author_photo_url: null, rating: 4,
       content: "Simple, efficace et élégant. Le widget s'intègre parfaitement à notre site.",
-      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
+      status: "approved", tag: null, source: null, gdpr_consent: true, created_at: new Date().toISOString(),
     },
     {
       id: "demo-3", owner_id: "", author_name: "Sophie Martin", author_role: "Directrice Design",
       author_company: "CreativeStudio", author_photo_url: null, rating: 5,
       content: "Le design est magnifique. Mes clients sont impressionnés par la présentation.",
-      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
+      status: "approved", tag: null, source: null, gdpr_consent: true, created_at: new Date().toISOString(),
     },
     {
       id: "demo-4", owner_id: "", author_name: "Lucas Moreau", author_role: "Fondateur",
       author_company: "StartupLab", author_photo_url: null, rating: 5,
       content: "Exactement ce qu'il nous fallait pour mettre en avant nos avis clients.",
-      status: "approved", tag: null, gdpr_consent: true, created_at: new Date().toISOString(),
+      status: "approved", tag: null, source: null, gdpr_consent: true, created_at: new Date().toISOString(),
     },
   ];
 

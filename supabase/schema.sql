@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
   content TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   tag TEXT,
+  source TEXT DEFAULT 'louvi' CHECK (source IN ('louvi', 'google')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
