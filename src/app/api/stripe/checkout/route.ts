@@ -59,13 +59,14 @@ export async function POST(request: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getlouvi.com";
 
-    // If user already has an active subscription, update it instead of creating a new one
+    // If user already has an active subscription, update it via Stripe
     if (profile?.stripe_subscription_id) {
       try {
         const subscription = await getStripe().subscriptions.retrieve(
           profile.stripe_subscription_id
         );
         if (subscription.status === "active" || subscription.status === "trialing") {
+          // Update the subscription to the new price
           await getStripe().subscriptions.update(profile.stripe_subscription_id, {
             items: [
               {
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
             proration_behavior: "create_prorations",
           });
 
-          // Update plan in profile immediately
+          // Update plan in profile via admin (bypasses RLS)
           await getSupabaseAdmin()
             .from("profiles")
             .update({ plan: planId })
@@ -88,8 +89,18 @@ export async function POST(request: NextRequest) {
 
           return NextResponse.json({ url: `${appUrl}/dashboard/upgrade?success=true` });
         }
-      } catch {
-        // Subscription not found or invalid, proceed with new checkout
+      } catch (subError) {
+        console.error("Subscription update failed:", subError);
+        // Cancel the old broken subscription and proceed with new checkout
+        try {
+          await getStripe().subscriptions.cancel(profile.stripe_subscription_id);
+        } catch {
+          // Already canceled or invalid
+        }
+        await getSupabaseAdmin()
+          .from("profiles")
+          .update({ stripe_subscription_id: null })
+          .eq("id", user.id);
       }
     }
 

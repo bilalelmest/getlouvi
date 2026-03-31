@@ -87,10 +87,10 @@ export default function UpgradePage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || "Une erreur est survenue");
+        alert(data.error || "Une erreur est survenue (code: " + res.status + ")");
       }
-    } catch {
-      alert("Erreur de connexion au serveur");
+    } catch (err) {
+      alert("Erreur de connexion au serveur: " + (err instanceof Error ? err.message : "inconnue"));
     } finally {
       setLoadingPlan(null);
     }
