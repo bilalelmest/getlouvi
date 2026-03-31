@@ -57,8 +57,11 @@ export default function PublicWallPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const collectLinkId = params.userId as string;
-  const widgetStyle = searchParams.get("widget") || null;
-  const theme = searchParams.get("theme") || "light";
+  const rawWidget = searchParams.get("widget");
+  const rawTheme = searchParams.get("theme");
+  const validWidgets = ["grid", "carousel", "list", "badge"];
+  const widgetStyle = rawWidget && validWidgets.includes(rawWidget) ? rawWidget : null;
+  const theme = rawTheme === "dark" ? "dark" : "light";
   const supabase = createClient();
   const carouselRef = useRef<HTMLDivElement>(null);
 

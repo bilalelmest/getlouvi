@@ -69,6 +69,11 @@ export default function CollectPage() {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        setError("Format accepté : JPG, PNG ou WebP.");
+        return;
+      }
       if (file.size > 2 * 1024 * 1024) {
         setError("La photo ne doit pas dépasser 2 Mo.");
         return;
