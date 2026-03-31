@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe, getStripePrices } from "@/lib/stripe";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Get user profile
     const { data: profile } = await supabase
       .from("profiles")
-      .select("stripe_customer_id, company_name")
+      .select("stripe_customer_id, stripe_subscription_id, company_name")
       .eq("id", user.id)
       .single();
 
@@ -28,12 +29,21 @@ export async function POST(request: NextRequest) {
     let customerId = profile?.stripe_customer_id;
 
     if (!customerId) {
-      const customer = await getStripe().customers.create({
-        email: user.email,
-        name: profile?.company_name || undefined,
-        metadata: { supabase_user_id: user.id },
+      // Try to find existing customer on Stripe by email
+      const existing = await getStripe().customers.list({
+        email: user.email!,
+        limit: 1,
       });
-      customerId = customer.id;
+      if (existing.data.length > 0) {
+        customerId = existing.data[0].id;
+      } else {
+        const customer = await getStripe().customers.create({
+          email: user.email,
+          name: profile?.company_name || undefined,
+          metadata: { supabase_user_id: user.id },
+        });
+        customerId = customer.id;
+      }
 
       // Save customer ID to profile
       await supabase
@@ -49,7 +59,41 @@ export async function POST(request: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getlouvi.com";
 
-    // Create checkout session
+    // If user already has an active subscription, update it instead of creating a new one
+    if (profile?.stripe_subscription_id) {
+      try {
+        const subscription = await getStripe().subscriptions.retrieve(
+          profile.stripe_subscription_id
+        );
+        if (subscription.status === "active" || subscription.status === "trialing") {
+          await getStripe().subscriptions.update(profile.stripe_subscription_id, {
+            items: [
+              {
+                id: subscription.items.data[0].id,
+                price: priceId,
+              },
+            ],
+            metadata: {
+              supabase_user_id: user.id,
+              plan_id: planId,
+            },
+            proration_behavior: "create_prorations",
+          });
+
+          // Update plan in profile immediately
+          await getSupabaseAdmin()
+            .from("profiles")
+            .update({ plan: planId })
+            .eq("id", user.id);
+
+          return NextResponse.json({ url: `${appUrl}/dashboard/upgrade?success=true` });
+        }
+      } catch {
+        // Subscription not found or invalid, proceed with new checkout
+      }
+    }
+
+    // Create checkout session for new subscription
     const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
