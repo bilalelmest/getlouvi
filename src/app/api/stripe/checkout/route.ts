@@ -59,14 +59,14 @@ export async function POST(request: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getlouvi.com";
 
-    // If user already has an active subscription, update it via Stripe
+    // If user already has a subscription ID, check if it's still active
     if (profile?.stripe_subscription_id) {
       try {
         const subscription = await getStripe().subscriptions.retrieve(
           profile.stripe_subscription_id
         );
         if (subscription.status === "active" || subscription.status === "trialing") {
-          // Update the subscription to the new price
+          // Active subscription — update it to the new plan
           await getStripe().subscriptions.update(profile.stripe_subscription_id, {
             items: [
               {
@@ -89,14 +89,13 @@ export async function POST(request: NextRequest) {
 
           return NextResponse.json({ url: `${appUrl}/dashboard/upgrade?success=true` });
         }
-      } catch (subError) {
-        console.error("Subscription update failed:", subError);
-        // Cancel the old broken subscription and proceed with new checkout
-        try {
-          await getStripe().subscriptions.cancel(profile.stripe_subscription_id);
-        } catch {
-          // Already canceled or invalid
-        }
+        // Subscription exists but is canceled/expired — clear it and proceed to new checkout
+        await getSupabaseAdmin()
+          .from("profiles")
+          .update({ stripe_subscription_id: null })
+          .eq("id", user.id);
+      } catch {
+        // Subscription not found — clear it and proceed to new checkout
         await getSupabaseAdmin()
           .from("profiles")
           .update({ stripe_subscription_id: null })
