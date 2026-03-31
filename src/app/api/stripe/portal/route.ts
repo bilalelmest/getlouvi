@@ -17,7 +17,25 @@ export async function POST() {
       .eq("id", user.id)
       .single();
 
-    if (!profile?.stripe_customer_id) {
+    let customerId = profile?.stripe_customer_id;
+
+    // If no customer ID in profile, look it up on Stripe by email
+    if (!customerId && user.email) {
+      const customers = await getStripe().customers.list({
+        email: user.email,
+        limit: 1,
+      });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        // Save it for next time
+        await supabase
+          .from("profiles")
+          .update({ stripe_customer_id: customerId })
+          .eq("id", user.id);
+      }
+    }
+
+    if (!customerId) {
       return NextResponse.json(
         { error: "Aucun abonnement trouvé" },
         { status: 400 }
@@ -27,7 +45,7 @@ export async function POST() {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getlouvi.com";
 
     const session = await getStripe().billingPortal.sessions.create({
-      customer: profile.stripe_customer_id,
+      customer: customerId,
       return_url: `${appUrl}/dashboard/upgrade`,
     });
 

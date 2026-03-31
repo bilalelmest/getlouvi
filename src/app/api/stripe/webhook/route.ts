@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
             .from("profiles")
             .update({
               plan: planId,
+              stripe_customer_id: session.customer as string,
               stripe_subscription_id: session.subscription as string,
             })
             .eq("id", userId);
