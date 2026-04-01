@@ -87,7 +87,7 @@ export default function UpgradePage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert((data.error || "Erreur") + (data.detail ? "\n\nDétail: " + data.detail : "") + (data.envCheck ? "\n\nEnv: " + data.envCheck : "") + "\n(code: " + res.status + ")");
+        alert(data.error || "Une erreur est survenue");
       }
     } catch (err) {
       alert("Erreur de connexion au serveur: " + (err instanceof Error ? err.message : "inconnue"));
