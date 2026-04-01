@@ -53,9 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the right price ID
-    const priceId = annual
-      ? getStripePrices()[planId].annual
-      : getStripePrices()[planId].monthly;
+    const prices = getStripePrices()[planId];
+    const priceId = annual ? prices.annual : prices.monthly;
+
+    console.log("Checkout debug:", { planId, annual, priceId, monthlyEnv: process.env.STRIPE_PRICE_BUSINESS_MONTHLY });
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getlouvi.com";
 
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
     console.error("Stripe checkout error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Erreur lors de la création du paiement", detail: message },
+      { error: "Erreur lors de la création du paiement", detail: message, envCheck: process.env.STRIPE_PRICE_BUSINESS_MONTHLY?.substring(0, 20) },
       { status: 500 }
     );
   }
